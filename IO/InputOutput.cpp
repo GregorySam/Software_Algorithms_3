@@ -26,7 +26,7 @@ InputOutput::InputOutput(int argc,char** argv)
 
    Validate=false;
    users_number=0;
-   bitcoins_number=0;
+   cc_number=0;
    tweets_number=0;
 
    if(argc==12)                                    //if -complete
@@ -56,7 +56,7 @@ InputOutput::InputOutput(int argc,char** argv)
                 fclose(fp);
                 break;
             case 'b':
-                bitcoinsDict=optarg;
+                ccDict=optarg;
                 fp=fopen(optarg,"r");
                 if(fp== nullptr){
                     cout<<"Bitcoins keys file does not exist\n";
@@ -82,7 +82,7 @@ InputOutput::InputOutput(int argc,char** argv)
         }
     }
 
-    if(tweets_input_file.empty() || vector_tweets_input_file.empty() || output_file.empty() ||  vaderDict.empty() ||  bitcoinsDict.empty())
+    if(tweets_input_file.empty() || vector_tweets_input_file.empty() || output_file.empty() ||  vaderDict.empty() ||  ccDict.empty())
     {Print_Usage();exit(EXIT_FAILURE);}
 
 
@@ -105,46 +105,98 @@ vector<double> GetVector(const string& line)      //convert string of numbers to
 
 }
 
-void InputOutput::CheckInputFiles()     //read number of lines=number of vectors to save and radius from data file and check config file
+
+
+vector<string> GetKeyWords(const string& line)
 {
-    ifstream in(input_file);
-    string line,num;
+    vector<string> keywords;
 
-    number_of_points=0;
-    dimension=0;
-    vector<double> numbers;
+    string token;
 
-    getline(in,line);
+    stringstream iss(line);
 
-    if(!line.empty())
+    while(getline(iss, token,'\t')) {
+        keywords.push_back(token);
+    }
+
+    return keywords;
+}
+
+
+void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
+{
+    string line;
+
+    ///////////////tweets vectors////////////////////////////////
+
     {
-        number_of_points++;
+        ifstream tweets_v(vector_tweets_input_file);
+        string num;
+        vector<double> numbers;
+
+        getline(tweets_v,line);
         num=line.substr(line.find(',')+1,line.length());
         numbers=GetVector(num);
-        dimension=(unsigned int)numbers.size();
+        dimensions=numbers.size();
+        CCR.AddTweet(Tweet(numbers));
 
+        while(getline(tweets_v,line))
+        {
+
+            num=line.substr(line.find(',')+1,line.length());
+            numbers=GetVector(num);
+
+            CCR.AddTweet(Tweet(numbers));
+            tweets_number++;
+        }
+        tweets_v.close();
     }
 
 
-    while(getline(in,line))
+    ///////////////////////////////////////////////////////////
+
+    ///////////////////words scores//////////////////////////
     {
-        number_of_points++;
+        ifstream words_scores(vaderDict);
+
+        string word;
+        double score;
+
+        while(getline(words_scores, line)) {
+
+            word= line.substr(0,line.find('\t'));
+            score = stod(line.substr(line.find('\t')+1,line.length()));
+            CCR.Add_word(word,score);
+
+
+        }
+        words_scores.close();
+    }
+    ////////////////////////////////////////////////////
+
+    /////////////////////cc dictionary///////////////////////////////
+    {
+        ifstream cc(ccDict);
+
+        vector<string> keywords;
+        unsigned int i;
+
+        unsigned int val=0;
+        while(getline(cc, line,'\r')) {
+            keywords=GetKeyWords(line);
+
+            for(i=0;i<keywords.size();i++)
+            {
+                CCR.Addcc(keywords[i],val);
+            }
+
+            val++;
+        }
     }
 
-    in.close();
 
-    ifstream conf(configuration_file);
 
-    getline(conf,line);if(line.empty()){cout<<"Error with config file"<<endl;exit(EXIT_FAILURE);}
-    number_of_clusters=(unsigned int)stoul(line.substr(line.find(':')+1,line.length()));
 
-    getline(conf,line);if(line.empty()){cout<<"Error with config file"<<endl;exit(EXIT_FAILURE);}
-    number_of_hash_functions=(unsigned int)stoul(line.substr(line.find(':')+1,line.length()));
-
-    getline(conf,line);if(line.empty()){cout<<"Error with config file"<<endl;exit(EXIT_FAILURE);}
-    number_of_hash_tables=(unsigned int)stoul(line.substr(line.find(':')+1,line.length()));
-
-    conf.close();
 }
 
 //

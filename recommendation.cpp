@@ -5,7 +5,10 @@ int main(int argc,char** argv) {
 
 
     InputOutput IO(argc,argv);
-    IO.CheckInputFiles();
+
+    CryptoCurrencyRecommendation CCR;
+
+    IO.ReadFiles(CCR);
 
 
 
