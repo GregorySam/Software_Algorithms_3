@@ -25,6 +25,9 @@ public:
     void Addcc(string,unsigned int);
     void Add_word(string,double);
 
+    void SetTweetScore(vector<string>, unsigned int);
+    Tweet* GetTweet(unsigned int);
+
     ~CryptoCurrencyRecommendation()= default;
 
 

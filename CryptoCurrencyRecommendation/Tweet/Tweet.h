@@ -7,12 +7,14 @@
 
 #include "../../Point/Point.h"
 
-class Tweet:public Point{
+class Tweet{
     double Score=0;
+    unsigned int id;
+    vector<double> t_v;
     vector<unsigned  int> cc_ref;
 public:
     Tweet()=default;
-    explicit Tweet(const vector<double>&);
+    explicit Tweet(const vector<double>&, unsigned int);
     void SetScore(double);
     void AddCC(unsigned int);
     double GetScore();

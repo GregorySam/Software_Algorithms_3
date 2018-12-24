@@ -107,6 +107,8 @@ vector<double> GetVector(const string& line)      //convert string of numbers to
 
 
 
+
+
 vector<string> GetKeyWords(const string& line)
 {
     vector<string> keywords;
@@ -134,11 +136,13 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
         string num;
         vector<double> numbers;
 
+
         getline(tweets_v,line);
         num=line.substr(line.find(',')+1,line.length());
         numbers=GetVector(num);
-        dimensions=numbers.size();
-        CCR.AddTweet(Tweet(numbers));
+        dimensions=(unsigned int)numbers.size();
+        CCR.AddTweet(Tweet(numbers,tweets_number+1));
+        tweets_number++;
 
         while(getline(tweets_v,line))
         {
@@ -146,7 +150,7 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
             num=line.substr(line.find(',')+1,line.length());
             numbers=GetVector(num);
 
-            CCR.AddTweet(Tweet(numbers));
+            CCR.AddTweet(Tweet(numbers,tweets_number+1));
             tweets_number++;
         }
         tweets_v.close();
@@ -192,7 +196,54 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
 
             val++;
         }
+        cc_number=val;
     }
+    /////////////////////////////////////////////////////////
+
+    /////////////////////tweets ///////////////////////////////
+    {
+        ifstream tweets(tweets_input_file);
+        string userid,newuserid,tweet,tmp;
+        unsigned int tweetid;
+
+        getline(tweets, line);
+        P=(unsigned int)stoul(line.substr(line.find(':')+1,line.length()));
+
+        getline(tweets, line);
+        userid=line.substr(0,line.find('\t'));                  ///get string parts//////
+        tmp=line.substr(line.find('\t')+1,line.length());
+        tweetid=(unsigned int)stoul(tmp.substr(0,tmp.find('\t')));
+        tweet=tmp.substr(tmp.find('\t')+1,tmp.length());
+
+
+        User U(cc_number);                                      ///Add user and tweet to user
+        users_number++;
+        CCR.AddUser(U);
+
+        U.AddTweet(CCR.GetTweet(tweetid));
+        CCR.SetTweetScore(GetKeyWords(tweet),tweetid);
+
+
+        while(getline(tweets, line,'\r')) {
+
+            newuserid=line.substr(0,line.find('\t'));
+
+            tmp=line.substr(line.find('\t')+1,line.length());
+            tweetid=(unsigned int)stoul(tmp.substr(0,tmp.find('\t')));
+            tweet=tmp.substr(tmp.find('\t')+1,tmp.length());
+
+            CCR.SetTweetScore(GetKeyWords(tweet),tweetid);
+
+            if(newuserid!=userid)
+            {
+                U=User(cc_number);
+                CCR.AddUser(U);
+                users_number++;
+            }
+            U.AddTweet(CCR.GetTweet(tweetid));
+        }
+    }
+    ////////////////////////////////////////////////////////////////
 
 
 

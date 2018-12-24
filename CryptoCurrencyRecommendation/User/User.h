@@ -13,6 +13,7 @@ class User {
     vector<Tweet*> Tweets;
 public:
     explicit  User(unsigned int);
+    void AddTweet(Tweet*);
     ~User()= default;
 };
 

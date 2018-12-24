@@ -7,12 +7,17 @@
 
 
 
-User::User(unsigned int bitcoins_num)
+User::User(unsigned int cc_num)
 {
     static unsigned int id=0;
 
     user_id=id;
-    cc_scores.resize(bitcoins_num,nan(""));
+    cc_scores.resize(cc_num,nan(""));
 
     id++;
+}
+
+void User::AddTweet(Tweet* T)
+{
+    Tweets.push_back(T);
 }
