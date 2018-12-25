@@ -11,21 +11,25 @@
 
 class CryptoCurrencyRecommendation {
 
-    vector<User> Users;
+    vector<User*> Users;
     vector<Tweet> Tweets;
 
     multimap<string,unsigned int> dictionary_cc;
+    vector<string> CC_names;
+
     map<string,double> words_scores;
 
 public:
     CryptoCurrencyRecommendation()=default;
 
-    void AddUser(User);
+    void AddUser(User*);
     void AddTweet(Tweet);
-    void Addcc(string,unsigned int);
+    void Addcc_key(string,unsigned int);
+    void Addcc_name(string);
     void Add_word(string,double);
 
     void SetTweetScore(vector<string>, unsigned int);
+    void SetCCScores();
     Tweet* GetTweet(unsigned int);
 
     ~CryptoCurrencyRecommendation()= default;

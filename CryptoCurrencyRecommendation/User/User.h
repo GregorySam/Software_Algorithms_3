@@ -9,11 +9,14 @@
 
 class User {
     unsigned  int user_id;
-    vector<double> cc_scores;
+    vector<pair<double,unsigned int>> cc_scores;
+    vector<pair<double,unsigned int>*> NanCC;
+
     vector<Tweet*> Tweets;
 public:
     explicit  User(unsigned int);
     void AddTweet(Tweet*);
+    void SetCCScores();
     ~User()= default;
 };
 

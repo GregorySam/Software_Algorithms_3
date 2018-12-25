@@ -15,7 +15,7 @@
 
 void Print_Usage()
 {
-    cout<<"$./recommendation –i <input file> -v <input file vectors> -b <bitcoins> -d <vader dict> -o <output file> -validate\n-validate is not mandatory "<<endl;
+    cout<<"$./recommendation –i <input file> -v <input file vectors> -b <cccoins> -d <vader dict> -o <output file> -validate\n-validate is not mandatory "<<endl;
 }
 
 InputOutput::InputOutput(int argc,char** argv)
@@ -186,12 +186,13 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
         unsigned int i;
 
         unsigned int val=0;
-        while(getline(cc, line,'\r')) {
+        while(getline(cc, line)) {
             keywords=GetKeyWords(line);
 
-            for(i=0;i<keywords.size();i++)
+            CCR.Addcc_name(keywords[0]);
+            for(i=1;i<keywords.size();i++)
             {
-                CCR.Addcc(keywords[i],val);
+                CCR.Addcc_key(keywords[i],val);
             }
 
             val++;
@@ -216,15 +217,16 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
         tweet=tmp.substr(tmp.find('\t')+1,tmp.length());
 
 
-        User U(cc_number);                                      ///Add user and tweet to user
+        User* U=new User(cc_number);                                      ///Add user and tweet to user
+
         users_number++;
         CCR.AddUser(U);
 
-        U.AddTweet(CCR.GetTweet(tweetid));
+        U->AddTweet(CCR.GetTweet(tweetid));
         CCR.SetTweetScore(GetKeyWords(tweet),tweetid);
 
 
-        while(getline(tweets, line,'\r')) {
+        while(getline(tweets, line)) {
 
             newuserid=line.substr(0,line.find('\t'));
 
@@ -236,11 +238,12 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
 
             if(newuserid!=userid)
             {
-                U=User(cc_number);
+                U=new User(cc_number);
                 CCR.AddUser(U);
+                userid=newuserid;
                 users_number++;
             }
-            U.AddTweet(CCR.GetTweet(tweetid));
+            U->AddTweet(CCR.GetTweet(tweetid));
         }
     }
     ////////////////////////////////////////////////////////////////

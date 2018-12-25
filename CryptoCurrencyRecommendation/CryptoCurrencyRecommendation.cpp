@@ -13,10 +13,11 @@ void CryptoCurrencyRecommendation::AddTweet(Tweet T)
     Tweets.push_back(T);
 }
 
-void CryptoCurrencyRecommendation::AddUser(User U)
+void CryptoCurrencyRecommendation::AddUser(User* U)
 {
     Users.push_back(U);
 }
+
 
 Tweet* CryptoCurrencyRecommendation::GetTweet(unsigned int id)
 {
@@ -49,8 +50,29 @@ void CryptoCurrencyRecommendation::SetTweetScore(vector<string> s, unsigned int 
     Tweets[tweetid-1].SetScore(score);
 }
 
-void CryptoCurrencyRecommendation::Addcc(string key, unsigned int value)
+
+void CryptoCurrencyRecommendation::SetCCScores()
 {
+    unsigned int i;
+
+    for(i=0;i<Users.size();i++)
+    {
+        Users[i]->SetCCScores();
+    }
+
+
+
+}
+
+void CryptoCurrencyRecommendation::Addcc_name(string name)
+{
+    CC_names.push_back(name);
+}
+
+
+void CryptoCurrencyRecommendation::Addcc_key(string key, unsigned int value)
+{
+
     dictionary_cc.insert(pair<string,unsigned int>(key,value));
 }
 

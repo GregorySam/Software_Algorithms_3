@@ -23,3 +23,8 @@ double Tweet::GetScore()
 {
     return Score;
 }
+
+vector<unsigned  int>& Tweet::GetCC()
+{
+    return cc_ref;
+}

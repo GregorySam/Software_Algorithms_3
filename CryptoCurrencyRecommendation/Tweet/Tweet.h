@@ -17,7 +17,10 @@ public:
     explicit Tweet(const vector<double>&, unsigned int);
     void SetScore(double);
     void AddCC(unsigned int);
+
+    vector<unsigned  int>& GetCC();
     double GetScore();
+
     ~Tweet()= default;
 
 };
