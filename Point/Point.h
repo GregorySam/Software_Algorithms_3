@@ -11,18 +11,22 @@
 using namespace std;
 class Point {
     vector<double> v;
+    string name;
     vector<int> group_flags;       //all possible clusters that the point can be assigned
     unsigned int index{};
     int group_flag{};               //the flag of cluster the point belongs to
 
 
+
+
 public:
-    Point(const vector<double>&);
+    Point(const vector<double>&,string, unsigned int);
     Point()= default;
     ~Point()= default;
 
 
     vector<double> GetVector();
+    string GetName();
 
 
     unsigned int GetIndex();

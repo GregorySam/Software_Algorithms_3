@@ -10,6 +10,7 @@ int main(int argc,char** argv) {
     IO.ReadFiles(CCR);
 
     CCR.SetCCScores();
+    CCR.CosineLSHSearch(IO.P);
 
 
 

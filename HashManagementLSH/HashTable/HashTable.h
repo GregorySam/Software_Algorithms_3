@@ -9,11 +9,26 @@
 using namespace std;
 
 #include "HashTableElement.h"
+#include "../../Point/Distances.h"
 #include "../../ClusterManagement/ClusterManagement.h"
 #include "../../HashFunctions/Euclidean/Euclidean.h"
 #include "../../HashFunctions/Cosine/Cosine.h"
 #include "../../HashFunctions/HashFunction.h"
 
+
+
+class CompFun
+{
+public:
+    bool operator()(const pair<double,unsigned int>& a,const pair<double,unsigned int>& b)
+    {
+        if(a.first==b.first)
+        {
+            return a.second<b.second;
+        }
+        return a.first<b.first;
+    }
+};
 
 
 class HashTable {
@@ -34,7 +49,8 @@ public:
     void SavePoint(Point&);
     static  void InitializeR(unsigned int);
 
-    void SetNNPoints(Point&, double, ClusterManagement &);
+    void SetNNPointsCluster(Point&, double, ClusterManagement &);
+    void SetNNPointsPoint(Point&,set<pair<double,unsigned int>,CompFun>&,double, unsigned int&,Distances&);
 
 
 

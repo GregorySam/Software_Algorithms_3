@@ -90,8 +90,48 @@ void HashTable::SavePoint(Point& P)
 
 
 
-void
-HashTable::SetNNPoints(Point &q, double Radius, ClusterManagement &CM)   //find in hashtable NN of point q within Radius
+void HashTable::SetNNPointsPoint(Point &P, set<pair<double,unsigned int>,CompFun>& nearest_neighbours,double radius,unsigned int& max_n,Distances& D)
+{
+    unsigned int i;
+    long long f;
+
+    HashTableElement* pH= nullptr;
+    string min_name;
+    double dist=0;
+    unsigned int id= P.GetIndex();
+
+    HashTableElement HE(P,hashf_num);
+    f=CalculateFAndH(HE);
+
+
+
+    for(i=0;i<Points[f].size();i++)
+    {
+        pH=&Points[f][i];
+
+        vector<int> groups=pH->GetPoint()->GetGroups();
+
+        if(find(groups.begin(),groups.end(),id)!=groups.end()){ continue;}
+
+        if(pH->GetG()==HE.GetG()) {                                                                         //if g(p)==g(q)
+
+            dist=1-D.GetDistance(P,*pH->GetPoint(),"cosine");
+
+            if (dist <= radius || radius==0) {
+
+                nearest_neighbours.insert(make_pair(dist,pH->GetPoint()->GetIndex()));
+                pH->GetPoint()->Addgroupflag((int)id);
+            }
+        }
+    }
+
+
+
+
+
+}
+
+void HashTable::SetNNPointsCluster(Point &q, double Radius, ClusterManagement &CM)   //find in hashtable NN of point q within Radius
 {
     unsigned int i;
     long long f;

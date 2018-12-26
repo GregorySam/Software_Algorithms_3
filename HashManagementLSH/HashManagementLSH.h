@@ -9,6 +9,9 @@
 #include "../ClusterManagement/ClusterManagement.h"
 #include "../HashFunctions/HashFunction.h"
 
+
+
+
 class HashManagementLSH {
     unsigned int hash_tables_num;      //L parameter
     unsigned int hash_tables_size;     //n/2
@@ -25,7 +28,9 @@ public:
     ~HashManagementLSH();
 
     void InsertInHashTables(vector<Point>&);         //Insert p in evry hash table
-    void SearchNN(Point&,ClusterManagement&);         //Search NN of q in evry hash table
+    void SearchNNPoint(Point&,set<pair<double,unsigned int>,CompFun>&, unsigned int,Distances&);
+
+    void SearchNNCluster(Point&,ClusterManagement&);         //Search NN of q in evry hash table
                                                         //Search all hash tables for real nearest of q
     void SetRadius(double);
 };

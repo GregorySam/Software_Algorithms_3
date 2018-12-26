@@ -153,6 +153,7 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
             CCR.AddTweet(Tweet(numbers,tweets_number+1));
             tweets_number++;
         }
+        CCR.SetTweetsNum(tweets_number);
         tweets_v.close();
     }
 
@@ -198,6 +199,7 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
             val++;
         }
         cc_number=val;
+        CCR.SetCCNum(cc_number);
     }
     /////////////////////////////////////////////////////////
 
@@ -245,6 +247,7 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
             }
             U->AddTweet(CCR.GetTweet(tweetid));
         }
+        CCR.SetUsersNum(users_number);
     }
     ////////////////////////////////////////////////////////////////
 

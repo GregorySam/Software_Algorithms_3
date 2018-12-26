@@ -7,21 +7,24 @@
 #include <iostream>
 
 
-Point::Point(const vector<double>& dv):v(dv)
+Point::Point(const vector<double>& dv,string n,unsigned int id):v(dv),name(n)
 {
-    static unsigned int i=0;
 
-    index=i;
+    index=id;
 
     group_flag=-1;
 
-    i++;
 }
 
 
 vector <double> Point::GetVector()
 {
     return v;
+}
+
+string Point::GetName()
+{
+    return name;
 }
 
 void Point::SetVector(vector<double> newv)

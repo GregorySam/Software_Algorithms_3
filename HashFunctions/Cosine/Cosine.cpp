@@ -30,18 +30,6 @@ vector<double> Cosine::Get_Parameters()
     return R;
 }
 
-double CalculateCosine(vector<double> a, vector<double> b) {
-    double numerator,denominator,norma,normb;
-
-    numerator=inner_product(begin(a), end(a), begin(b), 0.0);
-
-    norma=sqrt(inner_product(begin(a), end(a), begin(a), 0.0));
-    normb=sqrt(inner_product(begin(b), end(b), begin(b), 0.0));
-    denominator=norma*normb;
-
-    return 1-(numerator/denominator);
-}
-
 
 double CalculateSimilarity(vector<double> a,vector<double> b)
 {
@@ -52,6 +40,8 @@ double CalculateSimilarity(vector<double> a,vector<double> b)
     norma=sqrt(inner_product(begin(a), end(a), begin(a), 0.0));
     normb=sqrt(inner_product(begin(b), end(b), begin(b), 0.0));
     denominator=norma*normb;
+
+    if(denominator==0){return 0;}
 
     return (numerator/denominator);
 }

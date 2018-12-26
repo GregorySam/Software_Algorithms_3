@@ -19,7 +19,6 @@ public:
     vector<double> Get_Parameters() override;
 };
 
-double CalculateCosine(vector<double> a,vector<double> b);
 double CalculateSimilarity(vector<double> a,vector<double> b);
 
 

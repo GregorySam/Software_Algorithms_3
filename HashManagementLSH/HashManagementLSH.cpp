@@ -8,8 +8,7 @@
 #include <algorithm>
 #include <random>
 #include <utility>
-
-
+#include <iostream>
 
 
 HashManagementLSH::HashManagementLSH(unsigned int dim, unsigned int L, unsigned int k, unsigned int n, string hash_name): hash_tables_num(L), hash_tables_size(n / 2), functions_number(k) {
@@ -113,7 +112,32 @@ void HashManagementLSH::SetRadius(double R)
     Radius=R;
 }
 
-void HashManagementLSH::SearchNN(Point& C,ClusterManagement& CM)
+
+void HashManagementLSH::SearchNNPoint(Point &P, set<pair<double,unsigned int>,CompFun>& vP, unsigned int max,Distances& D)
+{
+    unsigned int i;
+    unsigned int current_n=0,next_n;
+    double r=1;
+
+
+    while(current_n<=max)
+    {
+        r=r*2;
+        for(i=0;i< hash_tables_num;i++)
+        {
+
+            HT[i]->SetNNPointsPoint(P,vP,r,current_n,D);
+
+        }
+        next_n=(unsigned int)vP.size();
+        if(current_n==next_n){break;}
+        current_n=next_n;
+    }
+
+
+}
+
+void HashManagementLSH::SearchNNCluster(Point& C,ClusterManagement& CM)
 {
     unsigned int i;
 
@@ -122,7 +146,7 @@ void HashManagementLSH::SearchNN(Point& C,ClusterManagement& CM)
     for(i=0;i< hash_tables_num;i++)             //Searach q in evry hash table
     {
 
-        HT[i]->SetNNPoints(C, Radius, CM);
+        //HT[i]->SetNNPoints(C, Radius, CM);
 
     }
 
