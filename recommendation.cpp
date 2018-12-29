@@ -10,8 +10,18 @@ int main(int argc,char** argv) {
     IO.ReadFiles(CCR);
 
     CCR.SetCCScores();
-    CCR.CosineLSHSearch(IO.P);
 
+    CCR.HashUsersLSH();
+    CCR.ClusterTweets();
+
+
+    /////////////////Cosine LSH Recommendation/////////////////////////
+    CCR.CosineLSHSearchUsers(CCR.GetUsers(),5,false);                    ///1
+    CCR.CosineLSHSearchUsers(CCR.GetVirtualUsers(),2,true);             ///2
+
+
+    /////////////////Print Results////////////////////////////////////
+    IO.PrintResults(CCR,1);
 
 
 

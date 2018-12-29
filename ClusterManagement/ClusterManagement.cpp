@@ -30,30 +30,19 @@ ClusterManagement::ClusterManagement(unsigned int num_ofcentroids,unsigned int p
     Clusters.resize(clusters_number);
     Points.resize(ungrouped_points);
 
-    calcdist_size=(ungrouped_points+ungrouped_points)*(ungrouped_points+ungrouped_points+1)/2+ungrouped_points;
-
-    size=calcdist_size;
-    while(true)                                             //use static sized vector to save distances and use minimum size to fit maximum number of distances,else use dynamic map
-    {
-        try
-        {
-            CalculatedDist.resize(size,nan(""));
-            calcdist_size=size;
-        }
-        catch(std::bad_alloc& exc)
-        {
-            size=size/2;
-            continue;
-        }
-        break;
-    }
-
-
+    D=new Distances(ungrouped_points);
 
 
 }
 
+Distances* ClusterManagement::GetD() {
+    return D;
 
+}
+
+string ClusterManagement::GetMetric() {
+    return metric;
+}
 
 void ClusterManagement::InsertPoint(Point P)
 {
@@ -239,7 +228,7 @@ double ClusterManagement::SetRadius()                   //get minimum radius bas
         {
             if(i!=j)
             {
-                dist=GetDistance(*Centroids.at(i),*Centroids.at(j));
+                dist=D->GetDistance(*Centroids.at(i),*Centroids.at(j),metric);
                 if(dist<min)
                 {
                     min=dist;
@@ -262,7 +251,15 @@ void ClusterManagement::AssignUngroupedPoint(Point *P)
     min_dist=DBL_MAX;
     for(j=0;j<Centroids.size();j++)
     {
-        dist=GetDistance(*P,*Centroids[j]);
+        if(metric=="euclidean")
+        {
+            dist=D->GetDistance(*P,*Centroids[j],metric);
+        }
+        else
+        {
+            dist=1-D->GetDistance(*P,*Centroids[j],metric);
+        }
+
         if(dist<min_dist)
         {
             min_dist=dist;
@@ -276,33 +273,6 @@ void ClusterManagement::AssignUngroupedPoint(Point *P)
 
 }
 
-void ClusterManagement::AssignMultiflaggedPoint(Point *P)
-{
-    unsigned int j;
-    int min_index=0;
-    double dist,min_dist;
-
-    vector<int> flags=P->GetGroups();
-    min_dist=DBL_MAX;
-    for(j=0;j<flags.size();j++)
-    {
-        dist=GetDistance(*P,*Centroids[flags[j]]);
-        if(dist<min_dist)
-        {
-            min_dist=dist;
-            min_index=flags[j];
-        }
-    }
-    P->SetGroupFlag(min_index);
-    ungrouped_points--;
-
-    Clusters[min_index].push_back(P);
-    if(flags.size()>1)
-    { multiflag_occurances-=flags.size();}
-
-
-
-}
 
 void ClusterManagement::PartitionAroundMedoids()
 {
@@ -321,7 +291,7 @@ void ClusterManagement::PartitionAroundMedoids()
             {
                 if(k!=j)
                 {
-                   cost=cost+GetDistance(*Clusters[i][j],*Clusters[i][k]);
+                   cost=cost+D->GetDistance(*Clusters[i][j],*Clusters[i][k],metric);
                 }
             }
             if(cost<min_cost)
@@ -337,28 +307,28 @@ void ClusterManagement::PartitionAroundMedoids()
 }
 
 
-void ClusterManagement::AssignCurrentlyFlagged()
-{
-    unsigned int i;
-    Point* P;
-    vector<int> groups;
-
-    for(i=0;i<CurrentlyFlagged_ANN.size();i++)
-    {
-        P=CurrentlyFlagged_ANN[i];
-        groups=P->GetGroups();
-        if(groups.size()==1)
-        {
-            P->SetGroupFlag(groups[0]);
-            ungrouped_points--;
-        }
-        else
-        {
-            AssignMultiflaggedPoint(P);
-        }
-    }
-    CurrentlyFlagged_ANN.clear();
-}
+//void ClusterManagement::AssignCurrentlyFlagged()
+//{
+//    unsigned int i;
+//    Point* P;
+//    vector<int> groups;
+//
+//    for(i=0;i<CurrentlyFlagged_ANN.size();i++)
+//    {
+//        P=CurrentlyFlagged_ANN[i];
+//        groups=P->GetGroups();
+//        if(groups.size()==1)
+//        {
+//            P->SetGroupFlag(groups[0]);
+//            ungrouped_points--;
+//        }
+//        else
+//        {
+//            AssignMultiflaggedPoint(P);
+//        }
+//    }
+//    CurrentlyFlagged_ANN.clear();
+//}
 
 void ClusterManagement::InsertInFlagged(Point *P)
 {
@@ -368,7 +338,7 @@ void ClusterManagement::InsertInFlagged(Point *P)
 void ClusterManagement::DirectAssignPointsToClusters()
 {
     unsigned int i;
-    vector<int> groups;
+
     Point* P;
 
     for(i=0;i<Points.size();i++)
@@ -432,13 +402,6 @@ void ClusterManagement::Restart(bool kmeans)
 
     }
 
-    CalculatedDistMap.clear();
-
-    for(i=0;i<calcdist_size;i++)
-    {
-        CalculatedDist[i]=nan("");
-    }
-
 
     if(kmeans)
     {
@@ -500,7 +463,7 @@ double ClusterManagement::SilhouetteOfPoint(Point& P)
     {
         if(Clusters[flag][i]->GetIndex()!=P.GetIndex())
         {
-            dist=GetDistance(P,*Clusters[flag][i]);
+            dist=D->GetDistance(P,*Clusters[flag][i],metric);
         }
         else
         {
@@ -516,7 +479,7 @@ double ClusterManagement::SilhouetteOfPoint(Point& P)
     {
         if((int)i!=flag)
         {
-            dist=GetDistance(P,*Centroids[i]);
+            dist=D->GetDistance(P,*Centroids[i],metric);
             if(dist<min_dist)
             {
                 min_dist=dist;
@@ -528,7 +491,7 @@ double ClusterManagement::SilhouetteOfPoint(Point& P)
 
     for(i=0;i<Clusters[min_flag].size();i++)
     {
-        dist=GetDistance(P,*Clusters[min_flag][i]);
+        dist=D->GetDistance(P,*Clusters[min_flag][i],metric);
         sum_dist+=dist;
     }
     b_i=sum_dist/(double)(Clusters[min_flag].size());
@@ -615,90 +578,9 @@ void ClusterManagement::SilhouetteAndPrint(ofstream& out,bool complete,bool kmea
 }
 
 
-unsigned long int GetKey2(unsigned int a, unsigned int b)            //function from NXN->N
-{
-    unsigned int tmp;
-
-    if(a>b)
-    {
-        tmp=b;
-        b=a;
-        a=tmp;
-    }
-    return (((a+b)*(a+b+1))/2+b);
+vector<vector<Point*>>& ClusterManagement::GetClusters() {
+    return Clusters;
 }
-
-
-
-double ClusterManagement::GetDistance(Point& Pa, Point& Pb)             //save distance and pair (a,b) to map or distances with keys
-{
-
-    double dist=0;
-    bool usingmap=false;
-
-
-
-    unsigned long int key=GetKey2(Pa.GetIndex(),Pb.GetIndex());
-
-    if(Pa.GetIndex()>Points.size() || Pb.GetIndex()>Points.size())
-    {
-
-        if (metric == "euclidean") {
-            dist = CalculateEuclideanDistance(Pa.GetVector(), Pb.GetVector());
-        } else if (metric == "cosine") {
-            dist = CalculateSimilarity(Pa.GetVector(), Pb.GetVector());
-        }
-        return dist;
-    }
-
-    if(key>=calcdist_size)
-    {
-        map<unsigned long int,double>::iterator it;
-        it=CalculatedDistMap.find(key);
-        if(it!=CalculatedDistMap.end())
-        {
-            return it->second;
-        }
-        usingmap=true;
-
-    }
-    else
-    {
-
-        if(!isnan(CalculatedDist[key]))
-        {
-            return CalculatedDist[key];
-        }
-
-    }
-
-
-    if (metric == "euclidean") {
-        dist = CalculateEuclideanDistance(Pa.GetVector(), Pb.GetVector());
-    } else if (metric == "cosine") {
-        dist = CalculateSimilarity(Pa.GetVector(), Pb.GetVector());
-    }
-
-    if(usingmap)
-    {
-        try {
-            CalculatedDistMap.insert(make_pair(key,dist));
-        }
-        catch(std::bad_alloc& exc){
-
-        }
-
-
-    }
-    else if(key<calcdist_size)
-    {
-        CalculatedDist[key]=dist;
-    }
-    return dist;
-
-}
-
-
 
 void ClusterManagement::KmeansUpdate()
 {
@@ -721,7 +603,7 @@ void ClusterManagement::KmeansUpdate()
             name.append(to_string(i));
 
 
-            Centroids[i]=new Point(Centroids[i]->GetVector(),name,i);
+            Centroids[i]=new Point(Centroids[i]->GetVector(),name);
             Centroids[i]->SetGroupFlag(i);
             continue;
         }
@@ -741,7 +623,7 @@ void ClusterManagement::KmeansUpdate()
         name.append(to_string(i));
 
 
-        Centroids[i]=new Point(new_v,name,i);
+        Centroids[i]=new Point(new_v,name);
         Centroids[i]->SetGroupFlag(i);
 
 

@@ -13,7 +13,26 @@ unsigned  int User::GetUserId()
 }
 
 
-vector<pair<double*,unsigned int>>& User::GetNanScores()
+set<string> User::GetCCRes()
+{
+    return OutResultsNanCC;
+}
+
+void User::AddCCResults(vector<string> cc_names,bool Beta)
+{
+    unsigned int i;
+
+    if(Beta)
+    {
+        BetaResults=cc_names;
+    }
+    for(i=0;i<cc_names.size();i++)
+   {
+       OutResultsNanCC.insert(cc_names[i]);
+   }
+}
+
+vector<pair<double,unsigned int>>& User::GetNanScores()
 {
     return NanCC;
 }
@@ -21,10 +40,12 @@ vector<pair<double*,unsigned int>>& User::GetNanScores()
 User::User(unsigned int cc_num)
 {
     static unsigned int id=0;
-    unsigned int i=0;
+
 
     user_id=id;
+    id++;
     cc_scores.resize(cc_num,nan(""));
+
 
 }
 
@@ -68,7 +89,7 @@ void User::SetCCScores()
         if(isnan(cc_scores[i]))
         {
             cc_scores[i]=0;
-            NanCC.push_back(make_pair(&cc_scores[i],i));
+            NanCC.push_back(make_pair(cc_scores[i],i));
             continue;
         }
         sum+=cc_scores[i];

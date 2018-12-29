@@ -90,15 +90,15 @@ void HashTable::SavePoint(Point& P)
 
 
 
-void HashTable::SetNNPointsPoint(Point &P, set<pair<double,unsigned int>,CompFun>& nearest_neighbours,double radius,unsigned int& max_n,Distances& D)
+void HashTable::SetNNPointsPoint(Point &P)
 {
     unsigned int i;
     long long f;
 
     HashTableElement* pH= nullptr;
     string min_name;
-    double dist=0;
-    unsigned int id= P.GetIndex();
+
+    int id= P.GetGroupFlag();
 
     HashTableElement HE(P,hashf_num);
     f=CalculateFAndH(HE);
@@ -109,19 +109,10 @@ void HashTable::SetNNPointsPoint(Point &P, set<pair<double,unsigned int>,CompFun
     {
         pH=&Points[f][i];
 
-        vector<int> groups=pH->GetPoint()->GetGroups();
-
-        if(find(groups.begin(),groups.end(),id)!=groups.end()){ continue;}
-
         if(pH->GetG()==HE.GetG()) {                                                                         //if g(p)==g(q)
 
-            dist=1-D.GetDistance(P,*pH->GetPoint(),"cosine");
+            pH->GetPoint()->Addgroupflag(id);
 
-            if (dist <= radius || radius==0) {
-
-                nearest_neighbours.insert(make_pair(dist,pH->GetPoint()->GetIndex()));
-                pH->GetPoint()->Addgroupflag((int)id);
-            }
         }
     }
 
@@ -130,55 +121,55 @@ void HashTable::SetNNPointsPoint(Point &P, set<pair<double,unsigned int>,CompFun
 
 
 }
-
-void HashTable::SetNNPointsCluster(Point &q, double Radius, ClusterManagement &CM)   //find in hashtable NN of point q within Radius
-{
-    unsigned int i;
-    long long f;
-
-    HashTableElement* pH= nullptr;
-    string min_name;
-    double dist=0;
-    int flag=q.GetGroupFlag();
-
-    HashTableElement HE(q,hashf_num);
-    f=CalculateFAndH(HE);
-
-
-
-    for(i=0;i<Points[f].size();i++)
-    {
-        pH=&Points[f][i];
-        if(pH->GetPoint()->GetGroupFlag()!=-1){continue;}
-
-        vector<int> groups=pH->GetPoint()->GetGroups();
-
-        if(find(groups.begin(),groups.end(),flag)!=groups.end()){ continue;}
-
-        if(pH->GetG()==HE.GetG()) {                                                                         //if g(p)==g(q)
-
-            dist=CM.GetDistance(q,*pH->GetPoint());
-
-            if (dist <= Radius || Radius==0) {
-
-                if(!groups.empty())                                     //Add to group flags the flag of centroid near point
-               {
-                    if(groups.size()==1)
-                    {
-                        CM.SetFlagsNum(CM.GetMultiFlagged_Num()+1);
-                    }
-                   CM.SetFlagsNum(CM.GetMultiFlagged_Num()+1);
-
-                   pH->GetPoint()->Addgroupflag(flag);
-
-                   continue;
-               }
-                pH->GetPoint()->Addgroupflag(flag);
-                CM.InsertInFlagged(pH->GetPoint());
-            }
-        }
-    }
-}
+//
+//void HashTable::SetNNPointsCluster(Point &q, double Radius, ClusterManagement &CM)   //find in hashtable NN of point q within Radius
+//{
+//    unsigned int i;
+//    long long f;
+//
+//    HashTableElement* pH= nullptr;
+//    string min_name;
+//    double dist=0;
+//    int flag=q.GetGroupFlag();
+//
+//    HashTableElement HE(q,hashf_num);
+//    f=CalculateFAndH(HE);
+//
+//
+//
+//    for(i=0;i<Points[f].size();i++)
+//    {
+//        pH=&Points[f][i];
+//        if(pH->GetPoint()->GetGroupFlag()!=-1){continue;}
+//
+//        vector<int> groups=pH->GetPoint()->GetGroups();
+//
+//        if(find(groups.begin(),groups.end(),flag)!=groups.end()){ continue;}
+//
+//        if(pH->GetG()==HE.GetG()) {                                                                         //if g(p)==g(q)
+//
+//            dist=CM.GetD()->GetDistance(q,*pH->GetPoint(),CM.GetMetric());
+//
+//            if (dist <= Radius || Radius==0) {
+//
+//                if(!groups.empty())                                     //Add to group flags the flag of centroid near point
+//               {
+//                    if(groups.size()==1)
+//                    {
+//                        CM.SetFlagsNum(CM.GetMultiFlagged_Num()+1);
+//                    }
+//                   CM.SetFlagsNum(CM.GetMultiFlagged_Num()+1);
+//
+//                   pH->GetPoint()->Addgroupflag(flag);
+//
+//                   continue;
+//               }
+//                pH->GetPoint()->Addgroupflag(flag);
+//                CM.InsertInFlagged(pH->GetPoint());
+//            }
+//        }
+//    }
+//}
 
 HashTable::~HashTable()
 {

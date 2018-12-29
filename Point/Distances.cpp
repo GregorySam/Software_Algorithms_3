@@ -49,7 +49,24 @@ double Distances::GetDistance(Point& P1,Point& P2,string metric)
     double dist=0;
     bool usingmap=false;
 
+
+    if(P1.GetIndex()>max_size || P2.GetIndex()>max_size)
+    {
+
+        if (metric == "euclidean") {
+            dist = CalculateEuclideanDistance(P1.GetVector(), P2.GetVector());
+        } else if (metric == "cosine") {
+            dist =  CalculateSimilarity(P1.GetVector(), P2.GetVector());
+        }
+
+        return dist;
+    }
+
+
     unsigned long int key=GetKey(P1.GetIndex(),P2.GetIndex());
+
+
+
 
 
     if(key>=max_size)

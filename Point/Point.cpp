@@ -6,20 +6,32 @@
 #include <utility>
 #include <iostream>
 
+static unsigned int id=0;
 
-Point::Point(const vector<double>& dv,string n,unsigned int id):v(dv),name(n)
+Point::Point(const vector<double>& dv,string n):v(dv),name(n)
 {
 
     index=id;
 
     group_flag=-1;
+    id++;
 
 }
 
+void Point::Reset()
+{
+    id=0;
+}
 
 vector <double> Point::GetVector()
 {
     return v;
+}
+
+
+void Point::SetId(unsigned int i)
+{
+    index=i;
 }
 
 string Point::GetName()
@@ -46,10 +58,10 @@ int Point::GetGroupFlag()
 
 void Point::Addgroupflag(int flag)
 {
-    group_flags.push_back(flag);
+    group_flags.insert(flag);
 }
 
-vector<int> Point::GetGroups()
+set<int> Point::GetGroups()
 {
     return group_flags;
 }

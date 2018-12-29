@@ -4,7 +4,11 @@
 
 #include <fstream>
 #include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <unordered_map>
 #include "CryptoCurrencyRecommendation.h"
+
 
 
 
@@ -24,6 +28,143 @@ Tweet* CryptoCurrencyRecommendation::GetTweet(unsigned int id)
 {
     return &Tweets.at(id-1);
 }
+
+
+vector<Point>& CryptoCurrencyRecommendation::GetVirtualUsers()
+{
+    return VUsers;
+}
+
+void CryptoCurrencyRecommendation::ClusterPoints(ClusterManagement &CM, vector<Point> &Ps)
+{
+
+    unsigned int i,x=0;
+
+    for(i=0;i<Ps.size();i++)
+    {
+        CM.InsertPoint(Ps.at(i));
+    }
+
+
+
+    CM.KmeansPlusPlus();
+    while(true)
+    {
+        CM.DirectAssignPointsToClusters();
+        vector<Point*> OLdCentroids= CM.GetCentroids();
+        CM.KmeansUpdate();
+
+        if(!CM.CentroidsChange(OLdCentroids) || x==50){                  //if centroids have chenged
+
+            ////Free mem/////////
+
+            for(i=0;i<OLdCentroids.size();i++)
+            {
+                delete OLdCentroids[i];
+
+            }
+
+            /////////
+            break;
+        }
+        //Free mem/////////
+        if(x!=0)
+        {
+            for(i=0;i<OLdCentroids.size();i++)
+            {
+                delete OLdCentroids[i];
+
+            }
+        }
+        ///////
+        CM.Reset(true);
+        x++;
+    }
+
+}
+
+
+void CryptoCurrencyRecommendation::ClusterTweets()
+{
+    unsigned int j,i;
+
+
+    Point::Reset();
+
+
+    TweetsP=vector<Point>(tweets_num);
+    for(i=0;i<tweets_num;i++)
+    {
+        Point Po(Tweets[i].GetVector(),"");
+        TweetsP[i]=Po;
+    }
+
+    TweetsCluster=new ClusterManagement(10,tweets_num,(unsigned int)TweetsP.at(0).GetVector().size(),"cosine");
+
+
+    ClusterPoints(*TweetsCluster,TweetsP);
+
+    vector<User> VirtualUsers(10,User(cc_num));
+
+
+    vector<vector<Point*>>* TC;
+
+    TC=&TweetsCluster->GetClusters();
+
+    for(i=0;i<TC->size();i++)
+    {
+        for(j=0;j<TC->at(i).size();j++)
+        {
+            unsigned int tweet_id;
+
+            tweet_id=TC->at(i)[j]->GetIndex();
+
+            VirtualUsers[i].AddTweet(&Tweets.at(tweet_id));
+        }
+        VirtualUsers[i].SetCCScores();
+    }
+    /////////////////////////////////////////////////////////////////////////////////
+
+    VUsers=vector<Point>(VirtualUsers.size());
+
+
+
+    for(i=0;i<VUsers.size();i++)
+    {
+        VUsers[i]=Point(VirtualUsers[i].GetCC_Scores(),"");
+        VUsers[i].SetGroupFlag(i);
+    }
+
+
+}
+
+
+void CryptoCurrencyRecommendation::HashUsersLSH() {
+
+    CosineLSH=new HashManagementLSH(cc_num,7,5,(unsigned int)Users.size(),"cosine");
+
+    unsigned int i;
+
+    Point::Reset();
+
+    UsersP=vector<Point>(Users.size());
+    vector<double>* p_scores;
+
+
+    /////////////////////////A    /////////////////////////////////////////////////////
+    for(i=0;i<Users.size();i++)
+    {
+        p_scores=&Users[i]->GetCC_Scores();
+
+        Point Po(*p_scores,"");
+        Po.SetGroupFlag((int)i);
+        UsersP[i]=Po;
+    }
+
+    CosineLSH->InsertInHashTables(UsersP);
+
+}
+
 
 void CryptoCurrencyRecommendation::SetTweetScore(vector<string> s, unsigned int tweetid)
 {
@@ -52,34 +193,54 @@ void CryptoCurrencyRecommendation::SetTweetScore(vector<string> s, unsigned int 
 }
 
 
-void CryptoCurrencyRecommendation::SetNanScores(set<pair<double,unsigned int>,CompFun> &NN, unsigned int max_n,User& U,vector<Point>& Points)
+vector<pair<double,unsigned int>> CryptoCurrencyRecommendation::SetNanScores(set<pair<double,unsigned int>,CompFun> &NN, unsigned int max_n,User& U,vector<Point>& Points)
 {
     set<pair<double,unsigned int>,CompFun>::iterator it;
     unsigned int j,i,nan_scoreindex;
 
-    vector<pair<double*,unsigned int>>* nan_scores;
+    vector<pair<double,unsigned int>> nan_scores;
     double z=0,sum=0;
 
-    nan_scores=&U.GetNanScores();
+    nan_scores=U.GetNanScores();
+
 
     it=NN.begin();
-
-
-    for(j=0;j<nan_scores->size();j++)
+    for(i=0;i<max_n;i++)
     {
-        nan_scoreindex=nan_scores->at(j).second;
-        for(i=0;i<max_n;i++)
-        {
-            z=z+abs(D->GetDistance(Points[it->second],Points[U.GetUserId()],"cosine"));
-            sum=sum+D->GetDistance(Points[it->second],Points[U.GetUserId()],"cosine")*Points[it->second].GetVector().at(nan_scoreindex);
-            it++;
-        }
-        *nan_scores->at(j).first=(1/z)*sum;
+        if(it==NN.end()){break;}
+        z=z+abs(D->GetDistance(Points[it->second],UsersP[U.GetUserId()],"cosine"));
+        it++;
 
     }
+    z=1.0/z;
 
+
+
+    for(j=0;j<nan_scores.size();j++)
+    {
+        it=NN.begin();
+        nan_scoreindex=nan_scores.at(j).second;
+        for(i=0;i<max_n;i++)
+        {
+            if(it==NN.end()){break;}
+            sum=sum+D->GetDistance(Points[it->second],UsersP[U.GetUserId()],"cosine")*Points[it->second].GetVector().at(nan_scoreindex);
+            it++;
+
+        }
+
+        nan_scores.at(j).first=z*sum;
+        sum=0;
+    }
+    return nan_scores;
 
 }
+
+
+vector<Point>& CryptoCurrencyRecommendation::GetUsers()
+{
+    return UsersP;
+}
+
 
 
 User* CryptoCurrencyRecommendation::GetUser(unsigned int id)
@@ -87,39 +248,130 @@ User* CryptoCurrencyRecommendation::GetUser(unsigned int id)
     return Users[id];
 }
 
-void CryptoCurrencyRecommendation::CosineLSHSearch(unsigned int P)
+
+vector<string> CryptoCurrencyRecommendation::OutResults(vector<pair<double, unsigned int> >&UserNan_scores, unsigned int maxres)
 {
+
+    unsigned int j;
+    vector<string> cc_ResultsName(maxres);
+
+    if(UserNan_scores.size()<maxres)
+    {
+        maxres=(unsigned int)UserNan_scores.size();
+    }
+    for(j=0;j<maxres;j++)
+    {
+        cc_ResultsName[j]=CC_names[UserNan_scores[j].second];
+    }
+
+    return cc_ResultsName;
+
+}
+
+
+void CryptoCurrencyRecommendation::PrintResults(ofstream& out)
+{
+    unsigned int i,j;
+    set<string> cc;
+    set<string>::iterator it_cc;
+
+    for(i=0;i<Users.size();i++)
+    {
+        out<<i<<" ";
+        cc=Users[i]->GetCCRes();
+        if(cc.empty())
+        {
+            out<<"(default recommandation)"<<" ";
+            for(j=0;j<7;j++)
+            {
+                out<<CC_names[j]<<" ";
+            }
+        }
+        else
+        {
+            it_cc=cc.begin();
+            for(it_cc=cc.begin();it_cc!=cc.end();it_cc++)
+            {
+                out<<*it_cc<<" ";
+            }
+        }
+        out<<endl;
+    }
+}
+
+
+set<pair<double,unsigned int>,CompFun> CryptoCurrencyRecommendation::GetNNDist(Point &P,vector<Point>& Po)
+{
+    set<int> nn_indexes;
     unsigned int i;
+    double dist;
 
-    HashManagementLSH HM_LSH((unsigned int)cc_num,7,5,(unsigned int)Users.size(),"cosine");
-
-    vector<Point> Points(Users.size());
-    vector<double>* p_scores;
-    vector<double> zeros(cc_num,0);
+    set<int>::iterator it;
 
     set<pair<double,unsigned int>,CompFun> NN;
 
-    for(i=0;i<Users.size();i++)
-    {
-        p_scores=&Users[i]->GetCC_Scores();
+    nn_indexes=P.GetGroups();
+    it=nn_indexes.begin();
 
-        Point Po(*p_scores,"",i);
-        Points[i]=Po;
+    for(i=0;i<nn_indexes.size();i++)
+    {
+        dist=1-D->GetDistance(P,Po[*it],"cosine");
+        NN.insert(make_pair(dist,(unsigned int)*it));
+        it++;
     }
+    return NN;
 
-    HM_LSH.InsertInHashTables(Points);
 
-    for(i=0;i<Users.size();i++)
+}
+
+
+void CryptoCurrencyRecommendation::CosineLSHSearchUsers(vector<Point>& S, unsigned int max_out,bool Beta)
+{
+    unsigned int i;
+
+
+    vector<double> zeros(cc_num,0);
+
+
+    vector<pair<double,unsigned int>> UserNan_scores;
+    set<pair<double,unsigned int>,CompFun> NN;
+
+
+    vector<string> cc_ResultsName;
+    /////////////////////////A    /////////////////////////////////////////////////////
+
+
+
+    for(i=0;i<S.size();i++)
     {
-        if(Points[i].GetVector()==zeros)
-        {continue;}
-        HM_LSH.SearchNNPoint(Points[i],NN,P,*D);
-        SetNanScores(NN,P,*Users[i],Points);
+        CosineLSH->SearchNNPoint(S[i],P);
+    }
+    for(i=0;i<UsersP.size();i++)
+    {
+
+        NN=GetNNDist(UsersP[i],S);
+        if(UsersP[i].GetVector()==zeros)
+        {
+            UsersP[i].SetGroupFlag(-1);
+            continue;
+        }
+        UserNan_scores=SetNanScores(NN,P,*Users[i],S);
+        sort(UserNan_scores.begin(),UserNan_scores.end(),std::greater<>());
+        cc_ResultsName=OutResults(UserNan_scores,max_out);
+        Users[i]->AddCCResults(cc_ResultsName,Beta);
         NN.clear();
+        UsersP[i].SetGroupFlag(-1);
     }
-    //for evry user
 
 
+
+    ///////////////////////////////////////////////////////////////////////
+}
+
+
+void CryptoCurrencyRecommendation::SetPNeighbours(unsigned int n)
+{
+    P=n;
 }
 
 void CryptoCurrencyRecommendation::SetCCScores()
@@ -134,6 +386,18 @@ void CryptoCurrencyRecommendation::SetCCScores()
 
 }
 
+
+CryptoCurrencyRecommendation::~CryptoCurrencyRecommendation()
+{
+    unsigned int i;
+    for(i=0;i<users_num;i++)
+    {
+        delete Users[i];
+    }
+    delete D;
+    delete CosineLSH;
+    delete TweetsCluster;
+}
 
 void CryptoCurrencyRecommendation::SetCCNum(unsigned int n)
 {

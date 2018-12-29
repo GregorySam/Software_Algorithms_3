@@ -125,6 +125,23 @@ vector<string> GetKeyWords(const string& line)
 }
 
 
+void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method)
+{
+    ofstream out(output_file);
+
+    if(method==1)
+    {
+        out<<"Cosine LSH"<<endl;
+    } else{
+        out<<"Clustering"<<endl;
+    }
+    CCR.PrintResults(out);
+    out.close();
+
+
+
+}
+
 void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
 {
     string line;
@@ -141,7 +158,7 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
         num=line.substr(line.find(',')+1,line.length());
         numbers=GetVector(num);
         dimensions=(unsigned int)numbers.size();
-        CCR.AddTweet(Tweet(numbers,tweets_number+1));
+        CCR.AddTweet(Tweet(numbers,tweets_number));
         tweets_number++;
 
         while(getline(tweets_v,line))
@@ -212,10 +229,12 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
         getline(tweets, line);
         P=(unsigned int)stoul(line.substr(line.find(':')+1,line.length()));
 
+        CCR.SetPNeighbours(P);
+
         getline(tweets, line);
         userid=line.substr(0,line.find('\t'));                  ///get string parts//////
         tmp=line.substr(line.find('\t')+1,line.length());
-        tweetid=(unsigned int)stoul(tmp.substr(0,tmp.find('\t')));
+        tweetid=(unsigned int)stoul(tmp.substr(0,tmp.find('\t')))-1;
         tweet=tmp.substr(tmp.find('\t')+1,tmp.length());
 
 

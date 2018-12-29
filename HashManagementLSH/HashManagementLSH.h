@@ -28,7 +28,7 @@ public:
     ~HashManagementLSH();
 
     void InsertInHashTables(vector<Point>&);         //Insert p in evry hash table
-    void SearchNNPoint(Point&,set<pair<double,unsigned int>,CompFun>&, unsigned int,Distances&);
+    void SearchNNPoint(Point&, unsigned int);
 
     void SearchNNCluster(Point&,ClusterManagement&);         //Search NN of q in evry hash table
                                                         //Search all hash tables for real nearest of q

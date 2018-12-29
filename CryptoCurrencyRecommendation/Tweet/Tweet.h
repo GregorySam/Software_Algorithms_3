@@ -20,6 +20,7 @@ public:
 
     vector<unsigned  int>& GetCC();
     double GetScore();
+    vector<double> GetVector();
 
     ~Tweet()= default;
 

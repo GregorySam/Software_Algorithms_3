@@ -113,23 +113,22 @@ void HashManagementLSH::SetRadius(double R)
 }
 
 
-void HashManagementLSH::SearchNNPoint(Point &P, set<pair<double,unsigned int>,CompFun>& vP, unsigned int max,Distances& D)
+void HashManagementLSH::SearchNNPoint(Point &P, unsigned int max)
 {
     unsigned int i;
     unsigned int current_n=0,next_n;
-    double r=1;
+
 
 
     while(current_n<=max)
     {
-        r=r*2;
         for(i=0;i< hash_tables_num;i++)
         {
 
-            HT[i]->SetNNPointsPoint(P,vP,r,current_n,D);
+            HT[i]->SetNNPointsPoint(P);
 
         }
-        next_n=(unsigned int)vP.size();
+        next_n=(unsigned int)P.GetGroups().size();
         if(current_n==next_n){break;}
         current_n=next_n;
     }

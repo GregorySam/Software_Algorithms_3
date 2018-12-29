@@ -6,6 +6,7 @@
 #define SOFTWARE_ALGORITMS2_CLUSTERMANAGEMENT_H
 
 #include "../Point/Point.h"
+#include "../Point/Distances.h"
 
 #include <set>
 #include <map>
@@ -21,11 +22,8 @@ class ClusterManagement {
     vector<vector<Point*>> Clusters;
 
     vector<Point*> CurrentlyFlagged_ANN;
+    Distances* D;
 
-    map<unsigned long int,double> CalculatedDistMap;
-
-    vector<double> CalculatedDist;
-    unsigned  long int calcdist_size;
 
     unsigned int dimension;
     unsigned int clusters_number;           //centroids number
@@ -63,6 +61,7 @@ public:
 
     vector<Point>& GetPoints();
     vector<Point*>& GetCentroids();
+    vector<vector<Point*>>& GetClusters();
 
 
 
@@ -71,8 +70,8 @@ public:
 
     unsigned int GetUngroupedpoints_num();
     unsigned int GetMultiFlagged_Num();
-
-    double GetDistance(Point& ,Point&);
+    Distances* GetD();
+    string GetMetric();
 
 
     double SetRadius();

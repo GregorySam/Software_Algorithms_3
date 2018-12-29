@@ -28,3 +28,8 @@ vector<unsigned  int>& Tweet::GetCC()
 {
     return cc_ref;
 }
+
+vector<double> Tweet::GetVector()
+{
+    return t_v;
+}

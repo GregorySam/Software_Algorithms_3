@@ -9,19 +9,30 @@
 
 #include "../Point/Distances.h"
 #include "../HashManagementLSH/HashManagementLSH.h"
+#include "../ClusterManagement/ClusterManagement.h"
 #include "Tweet/Tweet.h"
 #include "User/User.h"
 
 class CryptoCurrencyRecommendation {
 
     vector<User*> Users;
+    vector<Point> UsersP;
+    vector<Point> VUsers;
+
+
     vector<Tweet> Tweets;
+    vector<Point> TweetsP;
 
     Distances *D=nullptr;
+    HashManagementLSH* CosineLSH=nullptr;
 
     unsigned int users_num=0;
     unsigned int tweets_num=0;
     unsigned int cc_num=0;
+
+    unsigned int P=0;
+
+    ClusterManagement* TweetsCluster=nullptr;
 
 
 
@@ -35,6 +46,11 @@ public:
     void SetUsersNum(unsigned int);
     void SetTweetsNum(unsigned int);
     void SetCCNum(unsigned int);
+    void SetPNeighbours(unsigned int);
+
+    vector<Point>& GetUsers();
+    vector<Point>& GetVirtualUsers();
+    set<pair<double,unsigned int>,CompFun> GetNNDist(Point&,vector<Point>&);
 
     void AddUser(User*);
     void AddTweet(Tweet);
@@ -44,13 +60,20 @@ public:
 
     void SetTweetScore(vector<string>, unsigned int);
     void SetCCScores();
-    void SetNanScores(set<pair<double,unsigned int>,CompFun>&, unsigned int,User&,vector<Point>&);
+    vector<pair<double,unsigned int>> SetNanScores(set<pair<double,unsigned int>,CompFun>&, unsigned int,User&,vector<Point>&);
     Tweet* GetTweet(unsigned int);
     User* GetUser(unsigned int);
 
-    void CosineLSHSearch(unsigned int);
+    void CosineLSHSearchUsers(vector<Point>&,unsigned int,bool);
+    void HashUsersLSH();
+    void ClusterTweets();
+    void ClusterPoints(ClusterManagement&,vector<Point>&);
 
-    ~CryptoCurrencyRecommendation()= default;
+
+    vector<string> OutResults(vector<pair<double,unsigned int>>&, unsigned int);
+    void PrintResults(ofstream&);
+
+    ~CryptoCurrencyRecommendation();
 
 
 
