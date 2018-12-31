@@ -15,8 +15,24 @@ unsigned  int User::GetUserId()
 
 set<string> User::GetCCRes()
 {
+    unsigned int i;
+
+    for(i=0;i<BetaResults.size();i++)
+    {
+        OutResultsNanCC.insert(BetaResults[i]);
+    }
+
+
     return OutResultsNanCC;
 }
+
+
+
+void User::ResetResults()
+{
+    OutResultsNanCC.clear();
+}
+
 
 void User::AddCCResults(vector<string> cc_names,bool Beta)
 {
@@ -25,6 +41,7 @@ void User::AddCCResults(vector<string> cc_names,bool Beta)
     if(Beta)
     {
         BetaResults=cc_names;
+        return;
     }
     for(i=0;i<cc_names.size();i++)
    {
@@ -89,7 +106,7 @@ void User::SetCCScores()
         if(isnan(cc_scores[i]))
         {
             cc_scores[i]=0;
-            NanCC.push_back(make_pair(cc_scores[i],i));
+            NanCC.emplace_back(cc_scores[i],i);
             continue;
         }
         sum+=cc_scores[i];

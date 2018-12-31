@@ -25,6 +25,7 @@ public:
     unsigned  int GetUserId();
     void SetCCScores();
     void AddCCResults(vector<string>,bool);
+    void ResetResults();
 
 
     set<string> GetCCRes();

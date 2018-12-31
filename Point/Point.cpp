@@ -8,7 +8,7 @@
 
 static unsigned int id=0;
 
-Point::Point(const vector<double>& dv,string n):v(dv),name(n)
+Point::Point(const vector<double>& dv,string n):v(dv),name(std::move(n))
 {
 
     index=id;

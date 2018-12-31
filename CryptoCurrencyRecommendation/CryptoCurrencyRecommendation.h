@@ -21,7 +21,7 @@ class CryptoCurrencyRecommendation {
 
 
     vector<Tweet> Tweets;
-    vector<Point> TweetsP;
+
 
     Distances *D=nullptr;
     HashManagementLSH* CosineLSH=nullptr;
@@ -32,7 +32,6 @@ class CryptoCurrencyRecommendation {
 
     unsigned int P=0;
 
-    ClusterManagement* TweetsCluster=nullptr;
 
 
 
@@ -51,6 +50,7 @@ public:
     vector<Point>& GetUsers();
     vector<Point>& GetVirtualUsers();
     set<pair<double,unsigned int>,CompFun> GetNNDist(Point&,vector<Point>&);
+    void ResetUsersResults();
 
     void AddUser(User*);
     void AddTweet(Tweet);
@@ -67,6 +67,7 @@ public:
     void CosineLSHSearchUsers(vector<Point>&,unsigned int,bool);
     void HashUsersLSH();
     void ClusterTweets();
+    void ClusterUsers();
     void ClusterPoints(ClusterManagement&,vector<Point>&);
 
 

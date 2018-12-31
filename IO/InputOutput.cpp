@@ -127,7 +127,7 @@ vector<string> GetKeyWords(const string& line)
 
 void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method)
 {
-    ofstream out(output_file);
+    ofstream out(output_file,std::fstream::in | std::fstream::out | std::fstream::app);
 
     if(method==1)
     {
@@ -136,6 +136,7 @@ void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method)
         out<<"Clustering"<<endl;
     }
     CCR.PrintResults(out);
+    out<<endl<<endl;
     out.close();
 
 
@@ -207,7 +208,15 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
         while(getline(cc, line)) {
             keywords=GetKeyWords(line);
 
-            CCR.Addcc_name(keywords[0]);
+            if(keywords.size()<5)
+            {
+                CCR.Addcc_name(keywords[0]);
+            }
+            else
+            {
+                CCR.Addcc_name(keywords[4]);
+            }
+
             for(i=1;i<keywords.size();i++)
             {
                 CCR.Addcc_key(keywords[i],val);
@@ -238,7 +247,7 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
         tweet=tmp.substr(tmp.find('\t')+1,tmp.length());
 
 
-        User* U=new User(cc_number);                                      ///Add user and tweet to user
+        auto* U=new User(cc_number);                                      ///Add user and tweet to user
 
         users_number++;
         CCR.AddUser(U);

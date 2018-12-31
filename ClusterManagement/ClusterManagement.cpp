@@ -17,8 +17,6 @@
 
 ClusterManagement::ClusterManagement(unsigned int num_ofcentroids,unsigned int points_number,unsigned int dim,string m)
 {
-    unsigned long int size;
-
 
     clusters_number=num_ofcentroids;
     ungrouped_points=points_number;
