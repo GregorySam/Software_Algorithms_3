@@ -119,13 +119,14 @@ vector<string> GetKeyWords(const string& line)
 
     while(getline(iss, token,'\t')) {
         keywords.push_back(token);
+        cout<<token<<endl;
     }
 
     return keywords;
 }
 
 
-void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method)
+void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method,double time)
 {
     ofstream out(output_file,std::fstream::in | std::fstream::out | std::fstream::app);
 
@@ -136,6 +137,7 @@ void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method)
         out<<"Clustering"<<endl;
     }
     CCR.PrintResults(out);
+    out<<"Execution time in seconds:"<<time<<endl;
     out<<endl<<endl;
     out.close();
 
@@ -247,7 +249,7 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
         tweet=tmp.substr(tmp.find('\t')+1,tmp.length());
 
 
-        auto* U=new User(cc_number);                                      ///Add user and tweet to user
+        auto* U=new User(cc_number,userid);                                      ///Add user and tweet to user
 
         users_number++;
         CCR.AddUser(U);
@@ -264,11 +266,12 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
             tweetid=(unsigned int)stoul(tmp.substr(0,tmp.find('\t')));
             tweet=tmp.substr(tmp.find('\t')+1,tmp.length());
 
+
             CCR.SetTweetScore(GetKeyWords(tweet),tweetid);
 
             if(newuserid!=userid)
             {
-                U=new User(cc_number);
+                U=new User(cc_number,newuserid);
                 CCR.AddUser(U);
                 userid=newuserid;
                 users_number++;
@@ -283,38 +286,3 @@ void InputOutput::ReadFiles(CryptoCurrencyRecommendation& CCR)
 
 
 }
-
-//
-//void InputOutput::PrintToFile(ClusterManagement &CM,int init,int assign,int update,double time)
-//{
-//    static ofstream out(output_file);
-//
-//
-//    out<<"Algorithm:I"<<init<<"A"<<assign<<"U"<<update<<endl;
-//    out<<"Metric:"<<metric<<endl;
-//    CM.SilhouetteAndPrint(out,DisplayClusters,update==1,time);
-//
-//
-//}
-//
-//
-//void InputOutput::ReadVectorsFile(ClusterManagement& CM){
-//    ifstream in(input_file);
-//    string line;
-//    string name;
-//    string num;
-//
-//    vector<double> numbers;
-//
-//    while(getline(in,line))
-//    {
-//        name=line.substr(0,line.find(','));
-//        num=line.substr(line.find(',')+1,line.length());
-//        numbers=GetVector(num);
-//
-//        Point P(numbers,name);
-//        CM.InsertPoint(P);
-//    }
-//
-//}
-

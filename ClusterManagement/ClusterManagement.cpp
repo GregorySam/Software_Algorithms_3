@@ -42,9 +42,10 @@ string ClusterManagement::GetMetric() {
     return metric;
 }
 
+static unsigned  int i=0;
+
 void ClusterManagement::InsertPoint(Point P)
 {
-    static unsigned  int i=0;
 
     Points[i]=P;
 
@@ -362,6 +363,12 @@ bool ClusterManagement::CentroidsChange(vector<Point*> &OldCentroids)
         }
     }
     return false;
+}
+
+
+ClusterManagement::~ClusterManagement()
+{
+    i=0;
 }
 
 vector<double> DivideVectorByNum(const vector<double> &a ,const double b)

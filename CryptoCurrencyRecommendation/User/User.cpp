@@ -28,6 +28,7 @@ set<string> User::GetCCRes()
 
 
 
+
 void User::ResetResults()
 {
     OutResultsNanCC.clear();
@@ -49,18 +50,24 @@ void User::AddCCResults(vector<string> cc_names,bool Beta)
    }
 }
 
+string User::GetName()
+{
+    return name;
+}
+
 vector<pair<double,unsigned int>>& User::GetNanScores()
 {
     return NanCC;
 }
 
-User::User(unsigned int cc_num)
+User::User(unsigned int cc_num,string n)
 {
     static unsigned int id=0;
 
 
     user_id=id;
     id++;
+    name=n;
     cc_scores.resize(cc_num,nan(""));
 
 

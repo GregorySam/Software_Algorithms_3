@@ -14,12 +14,14 @@ class User {
     vector<pair<double,unsigned int>> NanCC;
     set<string> OutResultsNanCC;
     vector<string> BetaResults;
+    string name;
 
     vector<Tweet*> Tweets;
 public:
-    explicit  User(unsigned int);
+    explicit  User(unsigned int,string);
     vector<double>& GetCC_Scores();
     vector<pair<double,unsigned int>>& GetNanScores();
+    string GetName();
 
     void AddTweet(Tweet*);
     unsigned  int GetUserId();

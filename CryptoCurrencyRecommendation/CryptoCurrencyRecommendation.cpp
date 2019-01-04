@@ -42,7 +42,7 @@ void CryptoCurrencyRecommendation::ClusterPoints(ClusterManagement &CM, vector<P
 
     for(i=0;i<Ps.size();i++)
     {
-        CM.InsertPoint(Ps.at(i));
+        CM.InsertPoint(Ps[i]);
     }
 
 
@@ -90,15 +90,14 @@ void CryptoCurrencyRecommendation::ClusterUsers()
 
 
 
-    ClusterManagement* UsersCluster;
-    UsersCluster=new ClusterManagement(users_num/P,users_num,(unsigned int)UsersP.at(0).GetVector().size(),"euclidean");
+    ClusterManagement UsersCluster(users_num/P,users_num,(unsigned int)UsersP.at(0).GetVector().size(),"euclidean");
 
-    ClusterPoints(*UsersCluster,UsersP);
+    ClusterPoints(UsersCluster,UsersP);
 
     vector<vector<Point*>>* UC;
 
     User** Up;
-    UC=&UsersCluster->GetClusters();
+    UC=&UsersCluster.GetClusters();
 
     for(i=0;i<UC->size();i++)
     {
@@ -118,7 +117,7 @@ void CryptoCurrencyRecommendation::ClusterUsers()
                 }
             }
 
-            UserNan_scores=SetNanScores(NN,(unsigned int)UC->at(i).size()-1,**Up,UsersP);
+            UserNan_scores=SetNanScores(NN,(unsigned int)(UC->at(i).size()-1),**Up,UsersP);
             sort(UserNan_scores.begin(),UserNan_scores.end(),std::greater<>());
 
             cc_ResultsName=OutResults(UserNan_scores,5);
@@ -157,18 +156,18 @@ void CryptoCurrencyRecommendation::ClusterTweets()
         TweetsP[i]=Po;
     }
 
-    ClusterManagement* TweetsCluster;
-    TweetsCluster=new ClusterManagement(10,tweets_num,(unsigned int)TweetsP.at(0).GetVector().size(),"cosine");
+
+    ClusterManagement TweetsCluster(150,tweets_num,(unsigned int)TweetsP.at(0).GetVector().size(),"cosine");
 
 
-    ClusterPoints(*TweetsCluster,TweetsP);
+    ClusterPoints(TweetsCluster,TweetsP);
 
-    vector<User> VirtualUsers(10,User(cc_num));
+    vector<User> VirtualUsers(150,User(cc_num,""));
 
 
     vector<vector<Point*>>* TC;
 
-    TC=&TweetsCluster->GetClusters();
+    TC=&TweetsCluster.GetClusters();
 
     for(i=0;i<TC->size();i++)
     {
@@ -193,7 +192,7 @@ void CryptoCurrencyRecommendation::ClusterTweets()
         VUsers[i]=Point(VirtualUsers[i].GetCC_Scores(),"");
         VUsers[i].SetGroupFlag(i);
     }
-    delete TweetsCluster;
+
 
 
 }
@@ -337,7 +336,7 @@ void CryptoCurrencyRecommendation::PrintResults(ofstream& out)
 
     for(i=0;i<Users.size();i++)
     {
-        out<<i<<" ";
+        out<<Users[i]->GetName()<<" ";
         cc=Users[i]->GetCCRes();
         if(cc.empty())
         {

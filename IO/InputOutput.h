@@ -33,7 +33,7 @@ public:
 
     void ReadFiles(CryptoCurrencyRecommendation&);
 
-    void PrintResults(CryptoCurrencyRecommendation&,int);
+    void PrintResults(CryptoCurrencyRecommendation&,int,double);
 
 };
 

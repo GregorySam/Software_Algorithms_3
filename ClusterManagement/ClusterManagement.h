@@ -34,7 +34,7 @@ class ClusterManagement {
 
 public:
     ClusterManagement(unsigned int,unsigned int,unsigned int,string);
-    ~ClusterManagement()=default;
+    ~ClusterManagement();
     void InsertPoint(Point);
 
 
