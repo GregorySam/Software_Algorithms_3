@@ -15,11 +15,6 @@ using namespace std;
 
 class Distances{
 
-    map<unsigned long int,double> CalculatedDistMap;
-    vector<double> CalculatedDist;
-
-    unsigned long int max_size;
-
 public:
     double GetDistance(Point&,Point&,string);
     explicit Distances(unsigned int);

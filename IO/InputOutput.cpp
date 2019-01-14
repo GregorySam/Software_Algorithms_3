@@ -119,14 +119,13 @@ vector<string> GetKeyWords(const string& line)
 
     while(getline(iss, token,'\t')) {
         keywords.push_back(token);
-        cout<<token<<endl;
     }
 
     return keywords;
 }
 
 
-void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method,double time)
+void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method,double time,double A_MAE,double B_MAE)
 {
     ofstream out(output_file,std::fstream::in | std::fstream::out | std::fstream::app);
 
@@ -138,6 +137,8 @@ void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method,doub
     }
     CCR.PrintResults(out);
     out<<"Execution time in seconds:"<<time<<endl;
+    out<<"A Mean Absolute Error:"<<A_MAE<<endl;
+    out<<"B Mean Absolute Error:"<<B_MAE<<endl;
     out<<endl<<endl;
     out.close();
 

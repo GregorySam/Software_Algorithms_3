@@ -20,11 +20,14 @@ class CryptoCurrencyRecommendation {
     vector<Point> VUsers;
 
 
+
     vector<Tweet> Tweets;
 
 
     Distances *D=nullptr;
+
     HashManagementLSH* CosineLSH=nullptr;
+    ClusterManagement* VUCluster=nullptr;
 
     unsigned int users_num=0;
     unsigned int tweets_num=0;
@@ -60,16 +63,22 @@ public:
 
     void SetTweetScore(vector<string>, unsigned int);
     void SetCCScores();
-    vector<pair<double,unsigned int>> SetNanScores(set<pair<double,unsigned int>,CompFun>&, unsigned int,User&,vector<Point>&);
+    vector<pair<double,unsigned int>> SetNanScores(set<pair<double,unsigned int>,CompFun>&, unsigned int,User&,vector<Point>&,string);
     Tweet* GetTweet(unsigned int);
     User* GetUser(unsigned int);
 
-    void CosineLSHSearchUsers(vector<Point>&,unsigned int,bool);
+    void CosineLSHSearchUsers(vector<Point>&,unsigned int);
     void HashUsersLSH();
     void ClusterTweets();
     void ClusterUsers();
-    void ClusterPoints(ClusterManagement&,vector<Point>&);
+    void ClusterVirtualUsers();
 
+
+    vector<vector<pair<unsigned int,unsigned int>>>  CreateValidationSets();
+    double ValidationCosineLSH_A();
+    double ValidationCosineLSH_B();
+    double ValidationClustering_A();
+    double ValidationClustering_B();
 
     vector<string> OutResults(vector<pair<double,unsigned int>>&, unsigned int);
     void PrintResults(ofstream&);

@@ -12,22 +12,28 @@ class User {
     unsigned  int user_id;
     vector<double> cc_scores;
     vector<pair<double,unsigned int>> NanCC;
+    vector<unsigned int> KnownCC;
     set<string> OutResultsNanCC;
-    vector<string> BetaResults;
     string name;
 
     vector<Tweet*> Tweets;
 public:
+
+    User()= default;
+
     explicit  User(unsigned int,string);
     vector<double>& GetCC_Scores();
     vector<pair<double,unsigned int>>& GetNanScores();
     string GetName();
+    vector<unsigned int> GetKnownCC();
 
     void AddTweet(Tweet*);
     unsigned  int GetUserId();
     void SetCCScores();
-    void AddCCResults(vector<string>,bool);
+    void SetMeanValues();
+    void AddCCResults(vector<string>);
     void ResetResults();
+    void SetCCScore(unsigned int,double);
 
 
     set<string> GetCCRes();

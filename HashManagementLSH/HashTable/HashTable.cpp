@@ -90,7 +90,7 @@ void HashTable::SavePoint(Point& P)
 
 
 
-void HashTable::SetNNPointsPoint(Point &P)
+void HashTable::SetNNPointsPoint(Point &P,bool reversed)
 {
     unsigned int i;
     long long f;
@@ -98,7 +98,7 @@ void HashTable::SetNNPointsPoint(Point &P)
     HashTableElement* pH= nullptr;
     string min_name;
 
-    int id= P.GetGroupFlag();
+    int id= P.GetIndex();
 
     HashTableElement HE(P,hashf_num);
     f=CalculateFAndH(HE);
@@ -111,7 +111,15 @@ void HashTable::SetNNPointsPoint(Point &P)
 
         if(pH->GetG()==HE.GetG()) {                                                                         //if g(p)==g(q)
 
-            pH->GetPoint()->Addgroupflag(id);
+            if(reversed)
+            {
+                pH->GetPoint()->Addgroupflag(id);
+            }
+            else
+            {
+                P.Addgroupflag(pH->GetPoint()->GetIndex());
+            }
+
 
         }
     }

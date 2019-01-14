@@ -21,14 +21,14 @@ class ClusterManagement {
 
     vector<vector<Point*>> Clusters;
 
-    vector<Point*> CurrentlyFlagged_ANN;
+
     Distances* D;
 
 
     unsigned int dimension;
     unsigned int clusters_number;           //centroids number
     unsigned int ungrouped_points;          //number of points that dont belontg to any cluster
-    unsigned int multiflag_occurances;      //total number of flags in all points who belong to more than one cluster
+                                            //total number of flags in all points who belong to more than one cluster
     string metric;
 
 
@@ -37,45 +37,22 @@ public:
     ~ClusterManagement();
     void InsertPoint(Point);
 
-
-    void SelectRandom_k();
     void KmeansPlusPlus();
 
     void AssignUngroupedPoint(Point *);             //Assign point to right cluster
-    void AssignMultiflaggedPoint(Point *);
 
-    void InsertInFlagged(Point*);               //Insert point in flagged points in order to assing it later to proper cluster
-    void AssignCurrentlyFlagged();              //Assign all flagged points to right cluster
     void DirectAssignPointsToClusters();        //Direct assignment
 
     void KmeansUpdate();
-    void PartitionAroundMedoids();
 
     bool CentroidsChange(vector<Point*> &);
     void Reset(bool);                           //Resets algorithm for next iteration for current algorithm
-    void Restart(bool);                         //Resets arrays and parameters for next algorithm
 
-    void SilhouetteAndPrint(ofstream&,bool,bool,double);        //print to file results
     double SilhouetteOfPoint(Point&);
 
 
-    vector<Point>& GetPoints();
     vector<Point*>& GetCentroids();
     vector<vector<Point*>>& GetClusters();
-
-
-
-    void SetFlagsNum(unsigned int);
-
-
-    unsigned int GetUngroupedpoints_num();
-    unsigned int GetMultiFlagged_Num();
-    Distances* GetD();
-    string GetMetric();
-
-
-    double SetRadius();
-
 
 };
 

@@ -20,7 +20,7 @@ ClusterManagement::ClusterManagement(unsigned int num_ofcentroids,unsigned int p
 
     clusters_number=num_ofcentroids;
     ungrouped_points=points_number;
-    multiflag_occurances=0;
+
     dimension=dim;
     metric= std::move(m);
 
@@ -31,15 +31,6 @@ ClusterManagement::ClusterManagement(unsigned int num_ofcentroids,unsigned int p
     D=new Distances(ungrouped_points);
 
 
-}
-
-Distances* ClusterManagement::GetD() {
-    return D;
-
-}
-
-string ClusterManagement::GetMetric() {
-    return metric;
 }
 
 static unsigned  int i=0;
@@ -53,41 +44,6 @@ void ClusterManagement::InsertPoint(Point P)
 }
 
 
-void ClusterManagement::SelectRandom_k()
-{
-
-    random_device                  rand_dev;
-    mt19937                        generator(rand_dev());
-    uniform_int_distribution<int>  distr(0, static_cast<int>(Points.size() - 1));
-
-    vector<int> picked_ints;
-    picked_ints.resize(clusters_number);
-
-
-    Point* p;
-    for(unsigned int i=0;i<=clusters_number-1;i++)
-    {
-        int random=distr(generator);
-        if(find(picked_ints.begin(),picked_ints.end(),random)!=picked_ints.end())
-        {
-            i--;
-            continue;
-        }
-        picked_ints[i]=random;
-
-        p=&Points[random];
-        p->SetGroupFlag(i);
-
-
-        Centroids[i]=&*p;
-        Centroids[i]->SetGroupFlag(i);
-
-        Clusters[i].push_back(p);
-       ungrouped_points--;
-
-    }
-
-}
 
 typedef struct PointDist
 {
@@ -142,11 +98,6 @@ void CalculatePartialSums(map<double ,PointDist>& mPD,Point& centroid,vector<Poi
 
 }
 
-
-void ClusterManagement::SetFlagsNum(unsigned int num)
-{
-    multiflag_occurances=num;
-}
 
 
 
@@ -216,28 +167,6 @@ void ClusterManagement::KmeansPlusPlus()
 
 }
 
-double ClusterManagement::SetRadius()                   //get minimum radius based on centroids distance
-{
-    unsigned int i,j;
-    double min=DBL_MAX,dist;
-
-    for(i=0;i<Centroids.size();i++)
-    {
-        for(j=0;j<Centroids.size();j++)
-        {
-            if(i!=j)
-            {
-                dist=D->GetDistance(*Centroids.at(i),*Centroids.at(j),metric);
-                if(dist<min)
-                {
-                    min=dist;
-                }
-            }
-        }
-    }
-
-    return min;
-}
 
 void ClusterManagement::AssignUngroupedPoint(Point *P)
 {
@@ -273,66 +202,7 @@ void ClusterManagement::AssignUngroupedPoint(Point *P)
 }
 
 
-void ClusterManagement::PartitionAroundMedoids()
-{
-    unsigned int i,j,k,best_point=0;
-    double cost,min_cost;
 
-    for(i=0;i<Clusters.size();i++)
-    {
-
-        min_cost=DBL_MAX;
-
-        for(j=0;j<Clusters[i].size();j++)
-        {
-            cost=0.0;
-            for(k=0;k<Clusters[i].size();k++)
-            {
-                if(k!=j)
-                {
-                   cost=cost+D->GetDistance(*Clusters[i][j],*Clusters[i][k],metric);
-                }
-            }
-            if(cost<min_cost)
-            {
-                min_cost=cost;
-                best_point=j;
-            }
-        }
-        Centroids[i]=&*Clusters[i][best_point];
-        Centroids[i]->SetGroupFlag(i);
-    }
-
-}
-
-
-//void ClusterManagement::AssignCurrentlyFlagged()
-//{
-//    unsigned int i;
-//    Point* P;
-//    vector<int> groups;
-//
-//    for(i=0;i<CurrentlyFlagged_ANN.size();i++)
-//    {
-//        P=CurrentlyFlagged_ANN[i];
-//        groups=P->GetGroups();
-//        if(groups.size()==1)
-//        {
-//            P->SetGroupFlag(groups[0]);
-//            ungrouped_points--;
-//        }
-//        else
-//        {
-//            AssignMultiflaggedPoint(P);
-//        }
-//    }
-//    CurrentlyFlagged_ANN.clear();
-//}
-
-void ClusterManagement::InsertInFlagged(Point *P)
-{
-    CurrentlyFlagged_ANN.push_back(P);
-}
 
 void ClusterManagement::DirectAssignPointsToClusters()
 {
@@ -396,36 +266,6 @@ vector<double> AddVectors(const vector<double>& a ,const vector<double>& b)
     return c;
 }
 
-void ClusterManagement::Restart(bool kmeans)
-{
-
-    unsigned int i;
-
-    for(i=0;i<Points.size();i++)
-    {
-        Points[i].SetGroupFlag(-1);
-
-    }
-
-
-    if(kmeans)
-    {
-        for(i=0;i<Centroids.size();i++)
-        {
-            delete Centroids[i];
-        }
-    }
-
-
-    for(i=0;i<Clusters.size();i++)
-    {
-
-        Clusters[i].clear();
-
-    }
-    ungrouped_points= static_cast<unsigned int>(Points.size());
-    multiflag_occurances=0;
-}
 
 void ClusterManagement::Reset(bool kmeans)
 {
@@ -452,133 +292,6 @@ void ClusterManagement::Reset(bool kmeans)
         }
 
     }
-
-    multiflag_occurances=0;
-}
-
-double ClusterManagement::SilhouetteOfPoint(Point& P)
-{
-    int min_flag=0,flag=P.GetGroupFlag();
-    unsigned int i;
-    double dist,sum_dist=0,min_dist=DBL_MAX;
-    double a_i,b_i;
-
-
-    for(i=0;i<Clusters[flag].size();i++)
-    {
-        if(Clusters[flag][i]->GetIndex()!=P.GetIndex())
-        {
-            dist=D->GetDistance(P,*Clusters[flag][i],metric);
-        }
-        else
-        {
-            dist=0;
-        }
-
-        sum_dist+=dist;
-    }
-    a_i=sum_dist/(double)(Clusters[flag].size());
-
-
-    for(i=0;i<Centroids.size();i++)
-    {
-        if((int)i!=flag)
-        {
-            dist=D->GetDistance(P,*Centroids[i],metric);
-            if(dist<min_dist)
-            {
-                min_dist=dist;
-                min_flag=i;
-            }
-        }
-    }
-    sum_dist=0;
-
-    for(i=0;i<Clusters[min_flag].size();i++)
-    {
-        dist=D->GetDistance(P,*Clusters[min_flag][i],metric);
-        sum_dist+=dist;
-    }
-    b_i=sum_dist/(double)(Clusters[min_flag].size());
-    if(b_i!=b_i)
-    {return nan("");}
-
-    return (b_i-a_i)/max(a_i,b_i);
-
-}
-
-void ClusterManagement::SilhouetteAndPrint(ofstream& out,bool complete,bool kmeans,double time)
-{
-    unsigned int i,j;
-    long double stotal=0,p_sil;
-    vector<long double> sk(Clusters.size()+1,0.0);
-
-    for(i=0;i<Clusters.size();i++)
-    {
-        out<<"  CLUSTER-"<<i<<" {size:"<<Clusters[i].size()<<",centroid:";
-        string name=Centroids[i]->GetName();
-        if(kmeans)
-        {
-            vector<double> d=Centroids[i]->GetVector();
-
-            for (double k : d) {out<<k<<" ";}
-        }
-        else
-        {
-            out<<name;
-        }
-        out<<"}"<<endl;
-        if(complete){ out<<"  {";}
-        if(Clusters[i].empty())
-        {
-            if(complete){out<<"}"<<endl<<endl;}
-            sk[i]=nan("");
-            continue;
-        }
-
-
-        for(j=0;j<(unsigned int)Clusters[i].size();j++)
-        {
-
-            if(complete)
-            {
-                if(j==(Clusters[i].size()-1))
-                {
-                    out<<Clusters[i][j]->GetName()<<"}"<<endl<<endl;
-                }
-                else
-                {
-                    out<<Clusters[i][j]->GetName()<<",";
-                }
-            }
-            p_sil=SilhouetteOfPoint(*Clusters[i][j]);
-            if(isnan(p_sil))
-            {
-                sk[i]=nan("");
-                continue;
-            }
-            stotal+=p_sil;
-            sk[i]+=p_sil;
-        }
-        sk[i]=sk[i]/(double)Clusters[i].size();
-    }
-    stotal=stotal/(double)Points.size();
-
-    sk[Clusters.size()]=stotal;
-
-    out<<"  clustering_time:"<<time<<endl;
-    out<<"  Silhouette:[";
-    for(i=0;i<=Clusters.size();i++)
-    {
-        if(i==(Clusters.size()))
-        {
-            out<<sk[i]<<"]"<<endl<<endl;
-            break;
-        }
-        out<<sk[i]<<",";
-
-    }
-
 
 }
 
@@ -638,24 +351,9 @@ void ClusterManagement::KmeansUpdate()
 
 }
 
-vector<Point>& ClusterManagement::GetPoints()
-{
-    return Points;
-}
 
 vector<Point*>& ClusterManagement::GetCentroids()
 {
     return Centroids;
 }
-
-
-unsigned int ClusterManagement::GetUngroupedpoints_num(){
-    return ungrouped_points;
-}
-
-unsigned int ClusterManagement::GetMultiFlagged_Num()
-{
-    return multiflag_occurances;
-}
-
 

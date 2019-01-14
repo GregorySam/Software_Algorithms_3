@@ -92,12 +92,17 @@ void HashManagementLSH::InsertInHashTables(vector<Point>& Points)
 {
 
     unsigned int i,j;
+    vector<double> zeros(Points[0].GetVector().size(),0);
 
 
     for(j=0;j<Points.size();j++)
     {
+        if(Points[j].GetVector()==zeros)
+        { continue;}
+
         for(i=0;i< hash_tables_num;i++)
         {
+
             HT[i]->SavePoint(Points[j]);
         }
 
@@ -113,24 +118,20 @@ void HashManagementLSH::SetRadius(double R)
 }
 
 
-void HashManagementLSH::SearchNNPoint(Point &P, unsigned int max)
+void HashManagementLSH::SearchNNPoint(Point &P,bool reversed)
 {
     unsigned int i;
     unsigned int current_n=0,next_n;
 
 
 
-    while(current_n<=max)
     {
         for(i=0;i< hash_tables_num;i++)
         {
 
-            HT[i]->SetNNPointsPoint(P);
+            HT[i]->SetNNPointsPoint(P,reversed);
 
         }
-        next_n=(unsigned int)P.GetGroups().size();
-        if(current_n==next_n){break;}
-        current_n=next_n;
     }
 
 

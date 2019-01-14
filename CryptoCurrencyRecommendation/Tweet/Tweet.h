@@ -11,14 +11,14 @@ class Tweet{
     double Score=0;
     unsigned int id;
     vector<double> t_v;
-    vector<unsigned  int> cc_ref;
+    set<unsigned  int> cc_ref;
 public:
     Tweet()=default;
     explicit Tweet(const vector<double>&, unsigned int);
     void SetScore(double);
     void AddCC(unsigned int);
 
-    vector<unsigned  int>& GetCC();
+    set<unsigned  int>& GetCC();
     double GetScore();
     vector<double> GetVector();
 
