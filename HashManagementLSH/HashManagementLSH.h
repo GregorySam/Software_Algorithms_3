@@ -16,7 +16,7 @@ class HashManagementLSH {
     unsigned int hash_tables_num;      //L parameter
     unsigned int hash_tables_size;     //n/2
     unsigned int functions_number;      //k
-    double Radius;                      //R
+    //R
 
 
 
@@ -29,10 +29,7 @@ public:
 
     void InsertInHashTables(vector<Point>&);         //Insert p in evry hash table
     void SearchNNPoint(Point&,bool);
-
-    void SearchNNCluster(Point&,ClusterManagement&);         //Search NN of q in evry hash table
                                                         //Search all hash tables for real nearest of q
-    void SetRadius(double);
 };
 
 

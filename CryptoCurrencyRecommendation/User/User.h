@@ -9,7 +9,7 @@
 #include "../Tweet/Tweet.h"
 
 class User {
-    unsigned  int user_id;
+    unsigned  int user_id=0;
     vector<double> cc_scores;
     vector<pair<double,unsigned int>> NanCC;
     vector<unsigned int> KnownCC;

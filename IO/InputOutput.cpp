@@ -109,7 +109,7 @@ vector<double> GetVector(const string& line)      //convert string of numbers to
 
 
 
-vector<string> GetKeyWords(const string& line)
+vector<string> GetKeyWords(const string& line)                                          //split line into separated words with /t delimeter
 {
     vector<string> keywords;
 

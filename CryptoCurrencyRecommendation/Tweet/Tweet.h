@@ -9,7 +9,7 @@
 
 class Tweet{
     double Score=0;
-    unsigned int id;
+    unsigned int id{};
     vector<double> t_v;
     set<unsigned  int> cc_ref;
 public:

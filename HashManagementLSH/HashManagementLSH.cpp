@@ -112,18 +112,9 @@ void HashManagementLSH::InsertInHashTables(vector<Point>& Points)
 }
 
 
-void HashManagementLSH::SetRadius(double R)
-{
-    Radius=R;
-}
-
-
 void HashManagementLSH::SearchNNPoint(Point &P,bool reversed)
 {
     unsigned int i;
-    unsigned int current_n=0,next_n;
-
-
 
     {
         for(i=0;i< hash_tables_num;i++)
@@ -137,18 +128,3 @@ void HashManagementLSH::SearchNNPoint(Point &P,bool reversed)
 
 }
 
-void HashManagementLSH::SearchNNCluster(Point& C,ClusterManagement& CM)
-{
-    unsigned int i;
-
-
-
-    for(i=0;i< hash_tables_num;i++)             //Searach q in evry hash table
-    {
-
-        //HT[i]->SetNNPoints(C, Radius, CM);
-
-    }
-
-
-}

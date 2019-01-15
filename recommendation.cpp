@@ -7,13 +7,13 @@ int main(int argc,char** argv) {
     double A_MAE,B_MAE;
     clock_t begin_time,end_time;
 
-    InputOutput IO(argc,argv);
+    InputOutput IO(argc,argv);                              //Initialize parameters
     CryptoCurrencyRecommendation CCR;
 
 
-    IO.ReadFiles(CCR);
+    IO.ReadFiles(CCR);                                      //Read files
 
-    CCR.SetCCScores();
+    CCR.SetCCScores();                                       //Set users cc scores
 
 
     /////////////////Cosine LSH Recommendation/////////////////////////

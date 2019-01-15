@@ -49,7 +49,6 @@ public:
     void SavePoint(Point&);
     static  void InitializeR(unsigned int);
 
-    void SetNNPointsCluster(Point&, double, ClusterManagement &);
     void SetNNPointsPoint(Point&,bool);
 
 

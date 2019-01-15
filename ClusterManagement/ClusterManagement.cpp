@@ -28,7 +28,6 @@ ClusterManagement::ClusterManagement(unsigned int num_ofcentroids,unsigned int p
     Clusters.resize(clusters_number);
     Points.resize(ungrouped_points);
 
-    D=new Distances(ungrouped_points);
 
 
 }
@@ -181,11 +180,11 @@ void ClusterManagement::AssignUngroupedPoint(Point *P)
     {
         if(metric=="euclidean")
         {
-            dist=D->GetDistance(*P,*Centroids[j],metric);
+            dist=GetDistance(*P,*Centroids[j],metric);
         }
         else
         {
-            dist=1-D->GetDistance(*P,*Centroids[j],metric);
+            dist=1-GetDistance(*P,*Centroids[j],metric);
         }
 
         if(dist<min_dist)

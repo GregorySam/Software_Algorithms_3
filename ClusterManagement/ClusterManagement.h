@@ -22,8 +22,6 @@ class ClusterManagement {
     vector<vector<Point*>> Clusters;
 
 
-    Distances* D;
-
 
     unsigned int dimension;
     unsigned int clusters_number;           //centroids number
@@ -48,7 +46,6 @@ public:
     bool CentroidsChange(vector<Point*> &);
     void Reset(bool);                           //Resets algorithm for next iteration for current algorithm
 
-    double SilhouetteOfPoint(Point&);
 
 
     vector<Point*>& GetCentroids();

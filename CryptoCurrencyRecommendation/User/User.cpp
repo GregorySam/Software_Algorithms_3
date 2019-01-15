@@ -3,6 +3,7 @@
 //
 
 #include <cmath>
+#include <utility>
 #include "User.h"
 
 
@@ -15,7 +16,6 @@ unsigned  int User::GetUserId()
 
 set<string> User::GetCCRes()
 {
-    unsigned int i;
 
     return OutResultsNanCC;
 }
@@ -62,7 +62,7 @@ User::User(unsigned int cc_num,string n)
 
     user_id=id;
     id++;
-    name=n;
+    name= std::move(n);
     cc_scores.resize(cc_num,nan(""));
 
 
@@ -126,8 +126,7 @@ void User::SetMeanValues()
 
 void User::SetCCScores()
 {
-    unsigned int i,j,cc_index;
-    double sum=0,mean_value;
+    unsigned int i,cc_index;
 
     set<unsigned int>* cc_refs;
     set<unsigned int>::iterator it;

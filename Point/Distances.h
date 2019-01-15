@@ -4,25 +4,25 @@
 
 #ifndef SOFTWARE_ALGORITHMS_3_DISTANCE_H
 #define SOFTWARE_ALGORITHMS_3_DISTANCE_H
-#include <vector>
-#include <map>
-
 #include "Point.h"
 #include "../HashFunctions/Euclidean/Euclidean.h"
 #include "../HashFunctions/Cosine/Cosine.h"
 
-using namespace std;
+inline double GetDistance(Point& P1,Point& P2,const string& metric)
+{
 
-class Distances{
+    double dist=0;
 
-public:
-    double GetDistance(Point&,Point&,string);
-    explicit Distances(unsigned int);
-    ~Distances()=default;
+    if (metric == "euclidean") {
+        dist = CalculateEuclideanDistance(P1.GetVector(), P2.GetVector());
+    } else if (metric == "cosine") {
+        dist =  CalculateSimilarity(P1.GetVector(), P2.GetVector());
+    }
+
+    return dist;
 
 
-
-};
+}
 
 
 #endif //SOFTWARE_ALGORITHMS_3_DISTANCE_H
