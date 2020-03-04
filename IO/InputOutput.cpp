@@ -137,8 +137,12 @@ void InputOutput::PrintResults(CryptoCurrencyRecommendation &CCR,int method,doub
     }
     CCR.PrintResults(out);
     out<<"Execution time in seconds:"<<time<<endl;
-    out<<"A Mean Absolute Error:"<<A_MAE<<endl;
-    out<<"B Mean Absolute Error:"<<B_MAE<<endl;
+    if(Validate)
+    {
+        out<<"A Mean Absolute Error:"<<A_MAE<<endl;
+        out<<"B Mean Absolute Error:"<<B_MAE<<endl;
+    }
+
     out<<endl<<endl;
     out.close();
 

@@ -6,7 +6,7 @@
 
 
 
-Tweet::Tweet(const vector<double>& vd, unsigned int id):t_v(vd),id(id)
+Tweet::Tweet(const vector<double>& vd, unsigned int id):id(id),t_v(vd)
 {}
 
 void Tweet::AddCC(unsigned int cc_id)

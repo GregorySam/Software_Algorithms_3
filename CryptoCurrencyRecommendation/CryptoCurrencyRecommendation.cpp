@@ -119,7 +119,7 @@ void CryptoCurrencyRecommendation::ClusterUsers()                           //2A
                 }
             }
 
-            UserNan_scores=SetNanScores(NN,(unsigned int)(UC->at(i).size()-1),**Up,UsersP,"euclidean");
+            UserNan_scores=SetNanScores(NN,(unsigned int)(UC->at(i).size()-1),**Up,UsersP,"euclidean",false);
             sort(UserNan_scores.begin(),UserNan_scores.end(),std::greater<>());
 
             cc_ResultsName=OutResults(UserNan_scores,5);                    //Get cc names
@@ -207,7 +207,6 @@ vector<Point> ConvertUsersToPoints(vector<User*>& U)                            
 
     vector<Point> UP(U.size());
 
-    Point::Reset();
 
     for(i=0;i<U.size();i++)
     {
@@ -226,6 +225,7 @@ vector<Point> ConvertUsersToPoints(vector<User*>& U)                            
 void CryptoCurrencyRecommendation::HashUsersLSH() {                                             //Save Users As points in HashTables
 
     CosineLSH=new HashManagementLSH(cc_num,7,5,(unsigned int)Users.size(),"cosine");
+
 
 
 
@@ -312,7 +312,7 @@ void CryptoCurrencyRecommendation::ClusterVirtualUsers()
         {
             NN.insert(make_pair(0,UC->at(best_cluster)[k]->GetIndex()));
         }
-        UserNan_scores=SetNanScores(NN,(unsigned int)(UC->at(best_cluster).size()),**Up,VUsers,"euclidean");
+        UserNan_scores=SetNanScores(NN,(unsigned int)(UC->at(best_cluster).size()),**Up,VUsers,"euclidean",false);
 
         sort(UserNan_scores.begin(),UserNan_scores.end(),std::greater<>());
         cc_ResultsName=OutResults(UserNan_scores,2);
@@ -323,13 +323,17 @@ void CryptoCurrencyRecommendation::ClusterVirtualUsers()
 }
 
 
-vector<pair<double,unsigned int>> CryptoCurrencyRecommendation::SetNanScores(set<pair<double,unsigned int>,CompFun> &NN, unsigned int max_n,User& U,vector<Point>& Points,string sim_metric)
+vector<pair<double,unsigned int>> CryptoCurrencyRecommendation::SetNanScores(set<pair<double,unsigned int>,CompFun> &NN, unsigned int max_n,User& U,vector<Point>& Points,string sim_metric,bool SavedDist)
 {
     set<pair<double,unsigned int>,CompFun>::iterator it;                                    //Estiamte missing scores based on nearest neighbours
     unsigned int j,i,nan_scoreindex;
 
     vector<pair<double,unsigned int>> nan_scores;
     double z=0,sum=0;
+
+    double * CalcDistances;
+    CalcDistances=new double[max_n];
+
 
     nan_scores=U.GetNanScores();
 
@@ -340,11 +344,32 @@ vector<pair<double,unsigned int>> CryptoCurrencyRecommendation::SetNanScores(set
         if(it==NN.end()){break;}
         if(sim_metric=="euclidean")
         {
-            z=z+1.0/(1+abs(GetDistance(Points[it->second],UsersP[U.GetUserId()],sim_metric)));
+            if(SavedDist)
+            {
+                CalcDistances[i]=D->GetDistance(Points[it->second],UsersP[U.GetUserId()],sim_metric);
+                z=z+1.0/(1+abs(CalcDistances[i]));
+
+            }
+            else
+            {
+                CalcDistances[i]=GetDistance(Points[it->second],UsersP[U.GetUserId()],sim_metric);
+                z=z+1.0/(1+abs(CalcDistances[i]));
+
+            }
+
         }
         else
         {
-            z=z+abs(GetDistance(Points[it->second],UsersP[U.GetUserId()],sim_metric));
+            if(SavedDist)
+            {
+                CalcDistances[i]=D->GetDistance(Points[it->second],UsersP[U.GetUserId()],sim_metric);
+                z=z+abs(CalcDistances[i]);
+            }
+            else
+            {
+                CalcDistances[i]=GetDistance(Points[it->second],UsersP[U.GetUserId()],sim_metric);
+                z=z+abs(CalcDistances[i]);
+            }
         }
 
         it++;
@@ -363,11 +388,11 @@ vector<pair<double,unsigned int>> CryptoCurrencyRecommendation::SetNanScores(set
             if(it==NN.end()){break;}
             if(sim_metric=="euclidean")
             {
-                sum=sum+(1.0/(1+GetDistance(Points[it->second],UsersP[U.GetUserId()],sim_metric)))*Points[it->second].GetVector().at(nan_scoreindex);
+                 sum=sum+(1.0/(1+CalcDistances[i])*Points[it->second].GetVector().at(nan_scoreindex));
             }
             else
             {
-                sum=sum+GetDistance(Points[it->second],UsersP[U.GetUserId()],sim_metric)*Points[it->second].GetVector().at(nan_scoreindex);
+                sum=sum+CalcDistances[i]*Points[it->second].GetVector().at(nan_scoreindex);
             }
 
             it++;
@@ -377,6 +402,7 @@ vector<pair<double,unsigned int>> CryptoCurrencyRecommendation::SetNanScores(set
         nan_scores.at(j).first=z*sum;
         sum=0;
     }
+    delete CalcDistances;
     return nan_scores;
 
 }
@@ -456,7 +482,7 @@ set<pair<double,unsigned int>,CompFun> CryptoCurrencyRecommendation::GetNNDist(P
 
     for(i=0;i<nn_indexes.size();i++)
     {
-        dist=1-GetDistance(P,Po[*it],"cosine");
+        dist=1-D->GetDistance(P,Po[*it],"cosine");
         NN.insert(make_pair(dist,(unsigned int)*it));
         it++;
     }
@@ -572,6 +598,7 @@ vector<User> CopyUsers(vector<User*>& U)
 }
 
 
+
 vector<Point> CreateValidationPoints(vector<pair<unsigned int,unsigned int>>& Set,vector<User>& TestUsers,vector<Point>& TestUserP,set<unsigned int>& UserIdsRef)
 {                                                                                                                   //Get UserPoints from Validation points
     unsigned int j,user_id,cc_id;
@@ -601,14 +628,15 @@ vector<Point> CreateValidationPoints(vector<pair<unsigned int,unsigned int>>& Se
         TestUserP[user_id].SetVector(TestUsers[user_id].GetCC_Scores());
 
         ValidationPoints[a]=TestUserP[user_id];
+
         a++;
 
     }
     return ValidationPoints;
 
-
-
 }
+
+
 
 
 double CryptoCurrencyRecommendation::ValidationCosineLSH_B()
@@ -631,8 +659,11 @@ double CryptoCurrencyRecommendation::ValidationCosineLSH_B()
 
     Sets=CreateValidationSets();
 
+
+
     for(i=0;i<Sets.size();i++)
     {
+
         TestUsers=CopyUsers(Users);
         TestUserPoints=UsersP;
         UserIdsRef.clear();
@@ -674,7 +705,7 @@ double CryptoCurrencyRecommendation::ValidationCosineLSH_B()
             Up=&TestUsers[ValidationPoints[m].GetIndex()];
 
 
-            UserNan_scores=SetNanScores(NN,P,*Up,VUsers,"cosine");                              //calculate scores for P nn
+            UserNan_scores=SetNanScores(NN,P,*Up,VUsers,"cosine",false);                              //calculate scores for P nn
             error+=MAECalc(*Users[ValidationPoints[m].GetIndex()],UserNan_scores);
 
             NN.clear();
@@ -723,11 +754,14 @@ double CryptoCurrencyRecommendation::ValidationCosineLSH_A()
     double OverallError=0;
     double MeanOverallError=0;
 
+
+
     for(i=0;i<Sets.size();i++)
     {
         ////////Set train and validation points//////////////////////////////////
-        TestUsers=CopyUsers(Users);
-        TestUserPoints=UsersP;
+
+        TestUsers = CopyUsers(Users);
+        TestUserPoints = UsersP;
         UserIdsRef.clear();
 
 
@@ -788,13 +822,15 @@ double CryptoCurrencyRecommendation::ValidationCosineLSH_A()
             Up=&TestUsers[ValidationPoints[m].GetIndex()];
 
 
-            UserNan_scores=SetNanScores(NN,P,*Up,TestUserPoints,"cosine");
+            UserNan_scores=SetNanScores(NN,P,*Up,TestUserPoints,"cosine",false);
             error+=MAECalc(*Users[ValidationPoints[m].GetIndex()],UserNan_scores);
 
             NN.clear();
         }
         mean_error=error/(double)Sets[i].size();
         OverallError+=mean_error;
+
+
     }
     MeanOverallError=OverallError/10;
 
@@ -892,7 +928,7 @@ double CryptoCurrencyRecommendation::ValidationClustering_A()                   
             Up=&TestUsers[ValidationPoints[j].GetIndex()];
 
 
-            UserNan_scores=SetNanScores(NN,(unsigned int)NN.size(),*Up,TestUserPoints,"euclidean");
+            UserNan_scores=SetNanScores(NN,(unsigned int)NN.size(),*Up,TestUserPoints,"euclidean",false);
             error+=MAECalc(*Users[ValidationPoints[j].GetIndex()],UserNan_scores);
 
             NN.clear();
@@ -978,7 +1014,7 @@ double CryptoCurrencyRecommendation::ValidationClustering_B()
             Up=&TestUsers[ValidationPoints[j].GetIndex()];
 
 
-            UserNan_scores=SetNanScores(NN,(unsigned int)NN.size(),*Up,TestUserPoints,"euclidean");
+            UserNan_scores=SetNanScores(NN,(unsigned int)NN.size(),*Up,TestUserPoints,"euclidean",false);
             error+=MAECalc(*Users[ValidationPoints[j].GetIndex()],UserNan_scores);
 
             NN.clear();
@@ -1001,7 +1037,7 @@ double CryptoCurrencyRecommendation::ValidationClustering_B()
 
 
 
-void CryptoCurrencyRecommendation::CosineLSHSearchUsers(vector<Point>& S, unsigned int max_out)                         //Cosine LSH for A and B
+void CryptoCurrencyRecommendation::CosineLSHSearchUsers(vector<Point>& S, unsigned int max_out,bool isnot_virtual)                         //Cosine LSH for A and B
 {
     unsigned int i;
 
@@ -1034,7 +1070,9 @@ void CryptoCurrencyRecommendation::CosineLSHSearchUsers(vector<Point>& S, unsign
         if(NN.empty())
         {continue;}
 
-        UserNan_scores=SetNanScores(NN,P,*Users[i],S,"cosine");
+        UserNan_scores=SetNanScores(NN,P,*Users[i],S,"cosine",isnot_virtual);
+
+
         sort(UserNan_scores.begin(),UserNan_scores.end(),std::greater<>());
         cc_ResultsName=OutResults(UserNan_scores,max_out);
         Users[i]->AddCCResults(cc_ResultsName);
@@ -1086,6 +1124,7 @@ void CryptoCurrencyRecommendation::SetCCNum(unsigned int n)
 void CryptoCurrencyRecommendation::SetUsersNum(unsigned int n)
 {
     users_num=n;
+    D=new Distances(users_num);
 
 }
 

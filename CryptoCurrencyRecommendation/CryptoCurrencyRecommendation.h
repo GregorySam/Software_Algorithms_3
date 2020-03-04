@@ -27,6 +27,8 @@ class CryptoCurrencyRecommendation {
     HashManagementLSH* CosineLSH=nullptr;
     ClusterManagement* VUCluster=nullptr;
 
+    Distances* D=nullptr;
+
     unsigned int users_num=0;
     unsigned int tweets_num=0;
     unsigned int cc_num=0;
@@ -61,10 +63,10 @@ public:
 
     void SetTweetScore(vector<string>, unsigned int);
     void SetCCScores();
-    vector<pair<double,unsigned int>> SetNanScores(set<pair<double,unsigned int>,CompFun>&, unsigned int,User&,vector<Point>&,string);
+    vector<pair<double,unsigned int>> SetNanScores(set<pair<double,unsigned int>,CompFun>&, unsigned int,User&,vector<Point>&,string,bool);
     Tweet* GetTweet(unsigned int);
 
-    void CosineLSHSearchUsers(vector<Point>&,unsigned int);
+    void CosineLSHSearchUsers(vector<Point>&,unsigned int,bool);
     void HashUsersLSH();
     void ClusterTweets();
     void ClusterUsers();
@@ -76,6 +78,7 @@ public:
     double ValidationCosineLSH_B();
     double ValidationClustering_A();
     double ValidationClustering_B();
+    void ResetChangedTestUsers(vector<Point>&,vector<User>&,set<unsigned int>&);
 
     vector<string> OutResults(vector<pair<double,unsigned int>>&, unsigned int);
     void PrintResults(ofstream&);
